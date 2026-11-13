@@ -1,0 +1,26 @@
+* text=auto eol=lf
+*.sublime-package binary
+*.png binary
+
+# Package Control installs the GitHub archive of each version tag. Keep that
+# archive identical to the built .sublime-package: everything that is not a
+# package file is left out (checked by tools/check.py).
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.github export-ignore
+/.github/** export-ignore
+/dist export-ignore
+/dist/** export-ignore
+/tests export-ignore
+/tests/** export-ignore
+/docs export-ignore
+/docs/** export-ignore
+/tools export-ignore
+/tools/** export-ignore
+
+# Preserve byte-identical upstream PyYAML files (hash-checked by tests).
+copy_path_lib/vendor/yaml/error.py whitespace=-blank-at-eof
+copy_path_lib/vendor/yaml/events.py whitespace=-blank-at-eof
+copy_path_lib/vendor/yaml/parser.py whitespace=-blank-at-eof,-blank-at-eol
+copy_path_lib/vendor/yaml/scanner.py whitespace=-blank-at-eol
+copy_path_lib/vendor/yaml/tokens.py whitespace=-blank-at-eof

@@ -1,0 +1,25 @@
+[
+  {
+    "id": "preferences",
+    "children": [
+      {
+        "id": "package-settings",
+        "children": [
+          {
+            "caption": "Copy Path",
+            "children": [
+              {
+                "caption": "Settings",
+                "command": "edit_settings",
+                "args": {
+                  "base_file": "${packages}/CopyPath/CopyPath.sublime-settings",
+                  "default": "{\n\t\"json_path_style\": \"jsonpath\"\n}\n"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,67 @@
+[
+  {
+    "caption": "-"
+  },
+  {
+    "caption": "Copy Element Path",
+    "command": "copy_element_path",
+    "args": {
+      "context": true
+    }
+  },
+  {
+    "caption": "Copy Path As",
+    "command": "copy_path_menu",
+    "children": [
+      {
+        "caption": "JSONPath",
+        "command": "copy_element_path",
+        "args": {
+          "style": "jsonpath",
+          "context": true
+        }
+      },
+      {
+        "caption": "JSON Pointer",
+        "command": "copy_element_path",
+        "args": {
+          "style": "pointer",
+          "context": true
+        }
+      },
+      {
+        "caption": "XPath — Prefer Attributes",
+        "command": "copy_element_path",
+        "args": {
+          "style": "xpath_attributes",
+          "context": true
+        }
+      },
+      {
+        "caption": "XPath — Positional",
+        "command": "copy_element_path",
+        "args": {
+          "style": "xpath_positional",
+          "context": true
+        }
+      },
+      {
+        "caption": "XPath — Prefer Text",
+        "command": "copy_element_path",
+        "args": {
+          "style": "xpath_text",
+          "context": true
+        }
+      },
+      {"caption": "-"},
+      {
+        "caption": "Settings…",
+        "command": "edit_settings",
+        "args": {
+          "base_file": "${packages}/CopyPath/CopyPath.sublime-settings",
+          "default": "{\n\t\"json_path_style\": \"jsonpath\"\n}\n"
+        }
+      }
+    ]
+  }
+]

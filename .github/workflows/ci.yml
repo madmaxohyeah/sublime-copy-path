@@ -1,0 +1,49 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit-and-package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Sublime Text's plugin host runs Python 3.8; ubuntu-latest (26.04) has no 3.8 build.
+          - {os: ubuntu-24.04, python: '3.8'}
+          - {os: ubuntu-latest, python: '3.14'}
+          - {os: windows-latest, python: '3.14'}
+          - {os: macos-latest, python: '3.14'}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python tools/check.py
+  installed-editor-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build isolated GUI test environment
+        run: docker build -t copy-path-runtime -f tools/Dockerfile.runtime .
+      - name: Download official Sublime Text 4215
+        run: curl -fsSL --retry 3 https://download.sublimetext.com/sublime_text_build_4215_x64.tar.xz -o "$RUNNER_TEMP/sublime_text_build_4215_x64.tar.xz"
+      - name: Test the committed archive in real Sublime
+        run: >-
+          docker run --rm --network none
+          --mount type=bind,src="$GITHUB_WORKSPACE",dst=/work,readonly
+          --mount type=bind,src="$RUNNER_TEMP",dst=/evidence
+          --env TMPDIR=/evidence/work
+          copy-path-runtime python3 tools/runtime_smoke.py
+          --sublime-archive /evidence/sublime_text_build_4215_x64.tar.xz
+          --output /evidence/copy-path-runtime

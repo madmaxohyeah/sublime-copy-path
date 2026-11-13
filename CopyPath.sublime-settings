@@ -1,0 +1,8 @@
+{
+  "format": "auto",
+  "json_path_style": "jsonpath",
+  "xml_path_style": "attributes",
+  "show_in_context_menu": true,
+  "show_copy_path_as_submenu": true,
+  "max_file_chars": 2000000
+}
