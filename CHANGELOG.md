@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 — 2026-11-15
+
+- The README explains how to remove or customize the right-click menu by replacing the package's `Context.sublime-menu`.
+
 ## 1.0.0 — 2026-11-13
 
 First public release.

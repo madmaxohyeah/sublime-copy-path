@@ -108,6 +108,18 @@ Open **Copy Path As → Settings…**, **Preferences → Package Settings → Co
 - `max_file_chars`: positive integer up to the hard limit. Invalid settings safely fall back to defaults.
 - A view/project setting named `copy_path_format` overrides `format` for that view/project; useful for JSONC files named `.json`.
 
+## Right-click menu
+
+**Copy Element Path** and **Copy Path As** only appear in JSON, YAML and XML files, and `show_in_context_menu: false` removes the copy actions everywhere. Sublime Text on Windows and macOS still draws the **Copy Path As** heading, with **Settings…** inside, because it can't hide submenu headings there.
+
+To remove the entries completely, or to keep only the ones you use, replace the package's menu file with your own:
+
+1. Choose **Preferences → Browse Packages…** and create a folder named `CopyPath` there.
+2. In that folder, create a file named `Context.sublime-menu`.
+3. To remove the entries, put `[]` in the file. To customize them, copy the [original menu](https://github.com/madmaxohyeah/sublime-copy-path/blob/main/Context.sublime-menu) into the file and delete the entries you don't want.
+
+Your file replaces the package's menu until you delete it. After an update, compare it with the original menu if you want new entries. The Command Palette commands are not affected.
+
 ## Development
 
 ```sh
