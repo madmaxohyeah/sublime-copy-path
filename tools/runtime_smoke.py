@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Exercise CopyPath's installed archive in isolated Sublime Text 4215.
+"""Exercise Copy Path's installed archive in isolated Sublime Text 4215.
 
 The runner accepts the official Linux tarball and the already-built
-``dist/CopyPath.sublime-package``. It extracts Sublime into a disposable
+``dist/Copy Path.sublime-package``. It extracts Sublime into a disposable
 portable directory, refuses any pre-existing ``Data`` directory, installs only
 the exact package archive, and copies the probe into a separate test package.
 
@@ -129,7 +129,7 @@ def prepare_profile(sublime_dir, package_archive, driver_path, evidence):
     installed.mkdir(parents=True)
     probe.mkdir(parents=True)
     user.mkdir(parents=True)
-    shutil.copyfile(str(package_archive), str(installed / "CopyPath.sublime-package"))
+    shutil.copyfile(str(package_archive), str(installed / "Copy Path.sublime-package"))
     shutil.copyfile(str(driver_path), str(probe / "runtime_driver.py"))
     preferences = {
         "animation_enabled": False,
@@ -180,10 +180,10 @@ def validate_runtime_report(report, expected_archive_sha256, evidence_dir=None):
         raise RuntimeError("expected the Python 3.14 plugin host")
     if report.get("archive_only") is not True:
         raise RuntimeError("runtime did not load the archive-only installation")
-    if "CopyPath.sublime-package" not in (report.get("plugin_module") or ""):
+    if "Copy Path.sublime-package" not in (report.get("plugin_module") or ""):
         raise RuntimeError("plugin module was not loaded from the installed archive")
     probe_module = report.get("probe_module") or ""
-    if "CopyPathRuntimeProbe" not in probe_module or "CopyPath.sublime-package" in probe_module:
+    if "CopyPathRuntimeProbe" not in probe_module or "Copy Path.sublime-package" in probe_module:
         raise RuntimeError("runtime driver was not isolated in the separate probe package")
     if report.get("cleanup_issues"):
         raise RuntimeError("runtime process cleanup failed: {}".format(report["cleanup_issues"]))
@@ -241,8 +241,8 @@ def validate_runtime_report(report, expected_archive_sha256, evidence_dir=None):
             raise RuntimeError('Settings menu did not open package settings')
     modules = yaml_case.get("yaml_modules", {})
     if (yaml_case.get("yaml_imports_from_archive") is not True
-            or "CopyPath.copy_path_lib.vendor.yaml.parser" not in modules
-            or not all(isinstance(path, str) and "CopyPath.sublime-package/" in path
+            or "Copy Path.copy_path_lib.vendor.yaml.parser" not in modules
+            or not all(isinstance(path, str) and "Copy Path.sublime-package/" in path
                        for path in modules.values())):
         raise RuntimeError("YAML modules were not imported from the installed archive")
 
@@ -282,9 +282,9 @@ def run_self_tests():
         evidence.mkdir()
         data = prepare_profile(sublime_dir, package, driver, evidence)
         assert sorted(path.name for path in (data / "Installed Packages").iterdir()) == [
-            "CopyPath.sublime-package"
+            "Copy Path.sublime-package"
         ]
-        assert not (data / "Packages" / "CopyPath").exists()
+        assert not (data / "Packages" / "Copy Path").exists()
         try:
             prepare_profile(sublime_dir, package, driver, evidence)
         except RuntimeError as error:
@@ -321,7 +321,7 @@ def run_self_tests():
         "python": "3.14.6",
         "environment": {name: None for name in STRIPPED_EDITOR_ENV},
         "archive_only": True,
-        "plugin_module": "/portable/Data/Installed Packages/CopyPath.sublime-package/copy_path.py",
+        "plugin_module": "/portable/Data/Installed Packages/Copy Path.sublime-package/copy_path.py",
         "probe_module": "/portable/Data/Packages/CopyPathRuntimeProbe/runtime_driver.py",
         "cleanup_issues": [],
         "cases": [
@@ -344,8 +344,8 @@ def run_self_tests():
         if name == "yaml_archive_import":
             case["yaml_imports_from_archive"] = True
             case["yaml_modules"] = {
-                "CopyPath.copy_path_lib.vendor.yaml.parser":
-                    "/CopyPath.sublime-package/copy_path_lib/vendor/yaml/parser.py"
+                "Copy Path.copy_path_lib.vendor.yaml.parser":
+                    "/Copy Path.sublime-package/copy_path_lib/vendor/yaml/parser.py"
             }
         if name == "malformed_preserves_clipboard":
             case["status_messages"] = ["Invalid JSON document."]
@@ -922,8 +922,8 @@ def run_acceptance(args):
     driver = (ROOT / "tools" / "runtime_driver.py").resolve()
     if not package_archive.is_file():
         raise RuntimeError("candidate archive is missing: {}".format(package_archive))
-    if package_archive.name != "CopyPath.sublime-package":
-        raise RuntimeError("candidate archive must be named CopyPath.sublime-package")
+    if package_archive.name != "Copy Path.sublime-package":
+        raise RuntimeError("candidate archive must be named Copy Path.sublime-package")
     if not driver.is_file():
         raise RuntimeError("runtime driver is missing: {}".format(driver))
     if not sublime_archive.is_file():
@@ -1123,7 +1123,7 @@ def run_acceptance(args):
             }
             yaml_case["yaml_modules"] = yaml_paths
             yaml_case["yaml_imports_from_archive"] = bool(yaml_paths) and all(
-                "CopyPath.sublime-package" in path for path in yaml_paths.values()
+                "Copy Path.sublime-package" in path for path in yaml_paths.values()
             )
             yaml_case["passed"] = yaml_case["passed"] and yaml_case["yaml_imports_from_archive"]
             report["cases"].append(yaml_case)
@@ -1222,8 +1222,8 @@ def parse_arguments(argv=None):
     parser.add_argument(
         "--archive",
         type=Path,
-        default=ROOT / "dist" / "CopyPath.sublime-package",
-        help="exact CopyPath.sublime-package candidate",
+        default=ROOT / "dist" / "Copy Path.sublime-package",
+        help="exact Copy Path.sublime-package candidate",
     )
     parser.add_argument(
         "--sublime-archive",

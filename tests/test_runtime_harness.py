@@ -49,7 +49,7 @@ class RuntimeReportTests(unittest.TestCase):
                     case['screenshots'].append({'file': filename, 'sha256': hashlib.sha256(data).hexdigest()})
             if name == 'yaml_archive_import':
                 case['yaml_imports_from_archive'] = True
-                case['yaml_modules'] = {'CopyPath.copy_path_lib.vendor.yaml.parser': '/CopyPath.sublime-package/copy_path_lib/vendor/yaml/parser.py'}
+                case['yaml_modules'] = {'Copy Path.copy_path_lib.vendor.yaml.parser': '/Copy Path.sublime-package/copy_path_lib/vendor/yaml/parser.py'}
             if name == 'malformed_preserves_clipboard':
                 case['status_messages'] = ['Invalid JSON document.']
             if name == 'incomplete_xml':
@@ -66,7 +66,7 @@ class RuntimeReportTests(unittest.TestCase):
             'archive_sha256': self.digest,
             'installed_archive_sha256': self.digest,
             'archive_only': True,
-            'plugin_module': '/Data/Installed Packages/CopyPath.sublime-package/copy_path.py',
+            'plugin_module': '/Data/Installed Packages/Copy Path.sublime-package/copy_path.py',
             'probe_module': '/Data/Packages/CopyPathRuntimeProbe/runtime_driver.py',
             'cleanup_issues': [],
             'environment': {name: None for name in runtime.STRIPPED_EDITOR_ENV},

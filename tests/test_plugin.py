@@ -66,11 +66,11 @@ class AdapterTests(unittest.TestCase):
             def __init__(self, view): self.view = view
         plugin.TextCommand = TextCommand
         plugin.EventListener = object
-        package = types.ModuleType('CopyPath')
+        package = types.ModuleType('Copy Path')
         package.__path__ = [str(ROOT)]
-        self.patcher = patch.dict(sys.modules, {'sublime': sublime, 'sublime_plugin': plugin, 'CopyPath': package})
+        self.patcher = patch.dict(sys.modules, {'sublime': sublime, 'sublime_plugin': plugin, 'Copy Path': package})
         self.patcher.start()
-        spec = importlib.util.spec_from_file_location('CopyPath.copy_path', ROOT / 'copy_path.py')
+        spec = importlib.util.spec_from_file_location('Copy Path.copy_path', ROOT / 'copy_path.py')
         self.module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.module)
         self.view = View()

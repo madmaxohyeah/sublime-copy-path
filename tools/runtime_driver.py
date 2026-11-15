@@ -1,7 +1,7 @@
-"""Real Sublime Text probe for the CopyPath installed-archive smoke test.
+"""Real Sublime Text probe for the Copy Path installed-archive smoke test.
 
 This file is copied into a separate ``CopyPathRuntimeProbe`` package in a fresh
-portable Sublime profile. It is never included in ``CopyPath.sublime-package``.
+portable Sublime profile. It is never included in ``Copy Path.sublime-package``.
 The host harness communicates through small JSON request/response files so the
 only UI automation needed for product behavior is the native context menu.
 """
@@ -52,7 +52,7 @@ def _text(view):
 def _package_modules():
     result = {}
     for name, module in sorted(sys.modules.items()):
-        if name == "CopyPath" or name.startswith("CopyPath."):
+        if name == "Copy Path" or name.startswith("Copy Path."):
             location = getattr(module, "__file__", None)
             if location:
                 result[name] = location
@@ -61,7 +61,7 @@ def _package_modules():
 
 def _settings_open():
     return any(
-        (item.file_name() or '').replace('\\', '/').endswith('/Packages/User/CopyPath.sublime-settings')
+        (item.file_name() or '').replace('\\', '/').endswith('/Packages/User/Copy Path.sublime-settings')
         for window in sublime.windows() for item in window.views()
     )
 
@@ -143,7 +143,7 @@ def _setup(request_id, request):
         previous.set_scratch(True)
         previous.close()
     window.set_layout({'cols': [0.0, 1.0], 'rows': [0.0, 1.0], 'cells': [[0, 0, 1, 1]]})
-    settings = sublime.load_settings('CopyPath.sublime-settings')
+    settings = sublime.load_settings('Copy Path.sublime-settings')
     for key in ('show_in_context_menu', 'show_copy_path_as_submenu', 'xml_path_style'):
         settings.erase(key)
     for key, value in request.get('settings', {}).items():
@@ -184,7 +184,7 @@ def _run_command(request_id, request):
     style = request.get("style")
     if style is not None:
         arguments["style"] = style
-    plugin = importlib.import_module("CopyPath.copy_path")
+    plugin = importlib.import_module("Copy Path.copy_path")
     original_message = plugin._message
     status_messages = []
 
@@ -268,9 +268,9 @@ def _poll_control():
 
 def _write_ready():
     try:
-        plugin = importlib.import_module("CopyPath.copy_path")
-        archive = Path(sublime.installed_packages_path()) / "CopyPath.sublime-package"
-        unpacked = Path(sublime.packages_path()) / "CopyPath"
+        plugin = importlib.import_module("Copy Path.copy_path")
+        archive = Path(sublime.installed_packages_path()) / "Copy Path.sublime-package"
+        unpacked = Path(sublime.packages_path()) / "Copy Path"
         metadata = {
             "ready": True,
             "build": sublime.version(),

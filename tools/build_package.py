@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the self-contained CopyPath archive reproducibly on every platform."""
+"""Build the self-contained Copy Path archive reproducibly on every platform."""
 import argparse
 import hashlib
 import io
@@ -11,7 +11,7 @@ PACKAGE_FILES = (
     '.python-version',
     'CHANGELOG.md',
     'Context.sublime-menu',
-    'CopyPath.sublime-settings',
+    'Copy Path.sublime-settings',
     'Default.sublime-commands',
     'LICENSE',
     'Main.sublime-menu',
@@ -57,11 +57,11 @@ def main(argv=None):
     args = parser.parse_args(argv)
     data = package_bytes(ROOT)
     args.output.mkdir(parents=True, exist_ok=True)
-    artifact = args.output / 'CopyPath.sublime-package'
+    artifact = args.output / 'Copy Path.sublime-package'
     artifact.write_bytes(data)
     digest = hashlib.sha256(data).hexdigest()
-    (args.output / 'CopyPath.sublime-package.sha256').write_bytes(
-        (digest + '  CopyPath.sublime-package\n').encode('ascii')
+    (args.output / 'Copy Path.sublime-package.sha256').write_bytes(
+        (digest + '  Copy Path.sublime-package\n').encode('ascii')
     )
     print('{}  {}'.format(digest, artifact))
 

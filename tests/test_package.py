@@ -29,9 +29,9 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(archive.read(item.filename), (ROOT / item.filename).read_bytes())
     def test_committed_artifact_matches_source(self):
         expected = builder.package_bytes(ROOT)
-        artifact = ROOT / 'dist/CopyPath.sublime-package'
+        artifact = ROOT / 'dist/Copy Path.sublime-package'
         self.assertEqual(artifact.read_bytes(), expected)
-        self.assertEqual((ROOT / 'dist/CopyPath.sublime-package.sha256').read_text(encoding='utf-8'), hashlib.sha256(expected).hexdigest() + '  CopyPath.sublime-package\n')
+        self.assertEqual((ROOT / 'dist/Copy Path.sublime-package.sha256').read_text(encoding='utf-8'), hashlib.sha256(expected).hexdigest() + '  Copy Path.sublime-package\n')
     def test_native_resources(self):
         menu = json.loads((ROOT / 'Context.sublime-menu').read_text(encoding='utf-8'))
         direct = next(item for item in menu if item.get('caption') == 'Copy Element Path')
@@ -51,11 +51,11 @@ class PackageTests(unittest.TestCase):
         settings = submenu['children'][-1]
         self.assertEqual(settings['caption'], 'Settings…')
         self.assertEqual(settings['command'], 'edit_settings')
-        self.assertEqual(settings['args']['base_file'], '${packages}/CopyPath/CopyPath.sublime-settings')
-        for name in ['Main.sublime-menu', 'Default.sublime-commands', 'CopyPath.sublime-settings']:
+        self.assertEqual(settings['args']['base_file'], '${packages}/Copy Path/Copy Path.sublime-settings')
+        for name in ['Main.sublime-menu', 'Default.sublime-commands', 'Copy Path.sublime-settings']:
             json.loads((ROOT / name).read_text(encoding='utf-8'))
     def test_xpath_and_menu_defaults_are_shipped(self):
-        settings = json.loads((ROOT / 'CopyPath.sublime-settings').read_text(encoding='utf-8'))
+        settings = json.loads((ROOT / 'Copy Path.sublime-settings').read_text(encoding='utf-8'))
         self.assertIs(settings.get('show_copy_path_as_submenu'), True)
         self.assertEqual(settings.get('xml_path_style'), 'attributes')
         actions = json.loads((ROOT / 'Default.sublime-commands').read_text(encoding='utf-8'))

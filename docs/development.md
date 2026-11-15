@@ -9,7 +9,7 @@ python3 tools/build_package.py
 python3 tools/check.py
 ```
 
-`build_package.py` writes `dist/CopyPath.sublime-package` from the file list in `PACKAGE_FILES`. The archive is reproducible: the same source always gives the same bytes.
+`build_package.py` writes `dist/Copy Path.sublime-package` from the file list in `PACKAGE_FILES`. The archive is reproducible: the same source always gives the same bytes.
 
 `check.py` checks that the shipped Python files parse as Python 3.8, runs the unit tests and the runtime harness self-tests, compares `dist/` with a fresh build, checks that the release archive (see below) contains exactly `PACKAGE_FILES`, and runs `git diff --check`. It never rebuilds anything itself, so rebuild after changing a shipped file.
 
@@ -31,4 +31,4 @@ The vendored PyYAML files are kept byte-identical to the upstream release, and t
 
 1. Update `CHANGELOG.md`, rebuild, run `tools/check.py` and push to `main`. Wait for CI to pass.
 2. Tag the commit as `vX.Y.Z` (annotated) and push the tag. Package Control installs GitHub's archive of the newest tag. `export-ignore` in `.gitattributes` limits that archive to `PACKAGE_FILES`, so it matches `dist/` exactly.
-3. Upload `dist/CopyPath.sublime-package` and its `.sha256` file to the package website (see its `WEBSITE-README.md`).
+3. Upload `dist/Copy Path.sublime-package` and its `.sha256` file to the package website (see its `WEBSITE-README.md`).

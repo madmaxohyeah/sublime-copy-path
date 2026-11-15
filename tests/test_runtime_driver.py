@@ -18,7 +18,7 @@ class DriverCompletionTests(unittest.TestCase):
         )
         modules = {'sublime': sublime,
                    'sublime_plugin': types.SimpleNamespace(EventListener=object),
-                   'CopyPath.copy_path': self.product}
+                   'Copy Path.copy_path': self.product}
         self.modules = patch.dict(sys.modules, modules)
         self.modules.start()
         self.addCleanup(self.modules.stop)
@@ -60,7 +60,7 @@ class DriverCompletionTests(unittest.TestCase):
     def test_settings_detection_checks_the_separate_settings_window(self):
         self.assertTrue(hasattr(self.driver, '_settings_open'))
         original = types.SimpleNamespace(views=lambda: [])
-        settings_view = types.SimpleNamespace(file_name=lambda: '/profile/Data/Packages/User/CopyPath.sublime-settings')
+        settings_view = types.SimpleNamespace(file_name=lambda: '/profile/Data/Packages/User/Copy Path.sublime-settings')
         separate = types.SimpleNamespace(views=lambda: [settings_view])
         self.driver.sublime.windows = lambda: [original, separate]
         self.assertTrue(self.driver._settings_open())

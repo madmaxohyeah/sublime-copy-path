@@ -12,7 +12,7 @@
                 "caption": "Settings",
                 "command": "edit_settings",
                 "args": {
-                  "base_file": "${packages}/CopyPath/CopyPath.sublime-settings",
+                  "base_file": "${packages}/Copy Path/Copy Path.sublime-settings",
                   "default": "{\n\t\"json_path_style\": \"jsonpath\"\n}\n"
                 }
               }

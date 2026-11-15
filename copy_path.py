@@ -20,7 +20,7 @@ def _valid_format(value):
 
 def _config(view):
     """Validated settings; any malformed value falls back to its default."""
-    settings = sublime.load_settings('CopyPath.sublime-settings')
+    settings = sublime.load_settings('Copy Path.sublime-settings')
     # A view/project copy_path_format overrides the global format; an invalid
     # value at either level is ignored instead of hiding a valid global one.
     override = view.settings().get('copy_path_format')

@@ -12,16 +12,16 @@ Requires **Sublime Text 4** and is tested with build 4215. The plugin runs in Su
 
 ## Install
 
-**Package Control:** open the Command Palette, run **Package Control: Install Package** and choose **CopyPath**. Updates install automatically.
+**Package Control:** open the Command Palette, run **Package Control: Install Package** and choose **Copy Path**. Updates install automatically.
 
 **Manually:**
 
-1. Download **`CopyPath.sublime-package`** from the package website or this repository's `dist/` folder.
+1. Download **`Copy Path.sublime-package`** from the package website or this repository's `dist/` folder.
 2. In Sublime Text, choose **Preferences → Browse Packages…**.
 3. Go **up one folder**, then open or create **`Installed Packages`**.
-4. Place **`CopyPath.sublime-package`** there **without extracting or renaming it**, then restart Sublime Text.
+4. Place **`Copy Path.sublime-package`** there **without extracting or renaming it**, then restart Sublime Text.
 
-Do not put the ZIP inside `Packages/User` or double-click it to install. To update, replace the same file and restart. To uninstall, remove that file (or use **Package Control: Remove Package**) and optionally `Packages/User/CopyPath.sublime-settings`. Remove any unpacked development `Packages/CopyPath` copy before using a release archive; otherwise it can override the release.
+Do not put the ZIP inside `Packages/User` or double-click it to install. To update, replace the same file and restart. To uninstall, remove that file (or use **Package Control: Remove Package**) and optionally `Packages/User/Copy Path.sublime-settings`. Remove any unpacked development `Packages/Copy Path` copy before using a release archive; otherwise it can override the release.
 
 ## Use
 
@@ -114,7 +114,7 @@ Open **Copy Path As → Settings…**, **Preferences → Package Settings → Co
 
 To remove the entries completely, or to keep only the ones you use, replace the package's menu file with your own:
 
-1. Choose **Preferences → Browse Packages…** and create a folder named `CopyPath` there.
+1. Choose **Preferences → Browse Packages…** and create a folder named `Copy Path` there.
 2. In that folder, create a file named `Context.sublime-menu`.
 3. To remove the entries, put `[]` in the file. To customize them, copy the [original menu](https://github.com/madmaxohyeah/sublime-copy-path/blob/main/Context.sublime-menu) into the file and delete the entries you don't want.
 
@@ -127,7 +127,7 @@ python3 tools/build_package.py
 python3 tools/check.py
 ```
 
-`build_package.py` writes `dist/CopyPath.sublime-package`; `check.py` runs the tests and fails if that file is out of date. See [development](docs/development.md) and [architecture](docs/architecture.md) for details.
+`build_package.py` writes `dist/Copy Path.sublime-package`; `check.py` runs the tests and fails if that file is out of date. See [development](docs/development.md) and [architecture](docs/architecture.md) for details.
 
 ## License
 

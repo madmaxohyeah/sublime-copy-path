@@ -46,7 +46,7 @@ def main():
             ast.parse((ROOT / name).read_text(encoding='utf-8'), filename=name, feature_version=(3, 8))
     subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-v'], cwd=str(ROOT), check=True)
     subprocess.run([sys.executable, 'tools/runtime_smoke.py', '--self-test'], cwd=str(ROOT), check=True)
-    if (ROOT / 'dist/CopyPath.sublime-package').read_bytes() != package_bytes(ROOT):
+    if (ROOT / 'dist/Copy Path.sublime-package').read_bytes() != package_bytes(ROOT):
         raise SystemExit('Package is stale. Run python3 tools/build_package.py.')
     check_release_archive()
     if (ROOT / '.git').exists():
