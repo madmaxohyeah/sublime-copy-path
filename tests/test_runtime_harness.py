@@ -27,8 +27,8 @@ class RuntimeReportTests(unittest.TestCase):
             'mouse_auto_xml': "/catalog/book[@id='b']",
             'mouse_text_xml': "/catalog/book[.='Title']",
             'incomplete_xml': '/catalog[1]/book[2]',
-            'mouse_submenu_disabled': 'COPY_PATH_RUNTIME_SENTINEL_mouse_submenu_disabled',
-            'mouse_context_disabled': 'COPY_PATH_RUNTIME_SENTINEL_mouse_context_disabled',
+            'mouse_auto_submenu_disabled': "/catalog/book[@id='b']",
+            'mouse_text_context_disabled': "/catalog/book[.='Title']",
             'caret_multiple_unicode': '$.users[0].name\n$["\\u043a\\u043b\\u044e\\u0447"].emoji',
             'yaml_archive_import': '$.root.items[0].city',
             'malformed_preserves_clipboard': 'MALFORMED_CLIPBOARD_MUST_SURVIVE',
@@ -54,8 +54,6 @@ class RuntimeReportTests(unittest.TestCase):
                 case['status_messages'] = ['Invalid JSON document.']
             if name == 'incomplete_xml':
                 case['status_messages'] = ['Copied positional XPath from incomplete XML.']
-            if name in ('mouse_submenu_disabled', 'mouse_context_disabled'):
-                case['settings_open'] = True
             cases.append(case)
         self.report = {
             'passed': True,
@@ -78,7 +76,7 @@ class RuntimeReportTests(unittest.TestCase):
 
     def test_new_acceptance_inventory_includes_styles_recovery_and_settings(self):
         for case in ('mouse_auto_xml', 'mouse_text_xml', 'incomplete_xml',
-                     'mouse_submenu_disabled', 'mouse_context_disabled'):
+                     'mouse_auto_submenu_disabled', 'mouse_text_context_disabled'):
             self.assertIn(case, runtime.REQUIRED_CASES)
 
     def test_recovery_without_visible_warning_is_not_accepted(self):

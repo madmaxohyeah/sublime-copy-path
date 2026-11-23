@@ -62,47 +62,57 @@ def _message(message):
 
 
 class CopyPathMenuCommand(sublime_plugin.TextCommand):
-    """Visibility check for the Copy Path As submenu heading; running it does nothing.
+    """Visibility of the Copy Element Path As submenu heading; running it does nothing.
 
-    Linux hides the heading outside JSON, YAML and XML files. In supported files
-    it stays even when show_in_context_menu is false, so Settings... remains
-    reachable to turn copying back on. Windows and macOS always show submenu
-    headings, so Settings... also keeps the submenu from being empty there.
+    Only Linux asks a submenu heading whether it is visible: there the heading
+    disappears when show_copy_path_as_submenu is false. Windows and macOS
+    always draw it; the README explains how to replace the menu instead.
     """
 
     def run(self, edit):
         pass
 
     def is_visible(self):
-        return bool(not self.view.element() and _format(self.view) is not None)
+        return bool(not self.view.element() and _config(self.view).submenu)
 
 
 class CopyElementPathCommand(sublime_plugin.TextCommand):
     """Copy the path at the clicked point (context menu) or at every caret (palette).
 
     ``context`` is true only for context-menu entries, so the visibility
-    settings never hide Command Palette actions. Parsing runs on the async
-    thread; a newer request, an edit, a selection change or a tab switch
-    discards the result instead of overwriting the clipboard late.
+    settings never hide Command Palette actions. In the context menu,
+    show_in_context_menu controls the top-level entry and
+    show_copy_path_as_submenu the submenu entries. Entries that don't fit the
+    document are hidden; in a document that isn't JSON, YAML or XML, every
+    entry is shown greyed out instead. Parsing runs on the async thread; a
+    newer request, an edit, a selection change or a tab switch discards the
+    result instead of overwriting the clipboard late.
     """
 
     def want_event(self):
         return True
 
-    def is_visible(self, style='auto', event=None, context=False):
-        config = _config(self.view)
-        if self.view.element() or (context and not config.context_menu):
-            return False
-        if context and style != 'auto' and not config.submenu:
-            return False
-        kind = _format(self.view, config)
-        if kind is None:
-            return False
+    @staticmethod
+    def _fits(style, kind):
         return style in (('auto', 'xpath', 'xpath_attributes', 'xpath_positional', 'xpath_text')
                          if kind == 'xml' else ('auto', 'jsonpath', 'pointer'))
 
+    def is_visible(self, style='auto', event=None, context=False):
+        if self.view.element():
+            return False
+        config = _config(self.view)
+        if context and not (config.context_menu if style == 'auto' else config.submenu):
+            return False
+        kind = _format(self.view, config)
+        if kind is None:
+            return context  # Greyed out in the context menu, hidden in the palette.
+        return self._fits(style, kind)
+
     def is_enabled(self, style='auto', event=None, context=False):
-        return self.is_visible(style, event, context)
+        if self.view.element():
+            return False
+        kind = _format(self.view)
+        return kind is not None and self._fits(style, kind)
 
     def run(self, edit, style='auto', event=None, context=False):
         view = self.view

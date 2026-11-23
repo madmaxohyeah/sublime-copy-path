@@ -17,7 +17,7 @@ Parser errors are raised as `PathError` and never include document text.
 
 The buffer and selections are captured on the UI thread after the size check, parsed with `set_timeout_async`, and the result is applied back on the UI thread. The clipboard is only written if nothing changed in the meantime: same view, still active, no edits, same selection, same format and no newer request. Because the clipboard is global, a newer request always wins, even if it fails. Closing the view or unloading the plugin cancels pending work.
 
-Menu visibility depends only on syntax and settings; it never parses the buffer. The **Copy Path As** submenu has a no-op command (`copy_path_menu`) whose visibility check hides it outside supported files on Linux. Windows and macOS always draw submenu headings, so the submenu always ends with **Settings…** and is never empty.
+Menu visibility depends only on syntax and settings; it never parses the buffer. Context-menu entries pass `"context": true`: `show_in_context_menu` hides the top-level **Copy Element Path**, `show_copy_path_as_submenu` the entries of **Copy Element Path As**, and the Command Palette is never affected. Entries that don't fit the document are hidden; in a document that isn't JSON, YAML or XML every context-menu entry is shown greyed out, so the submenu is never empty. The submenu heading has a no-op command (`copy_path_menu`) that hides it when `show_copy_path_as_submenu` is false, which only Linux honours: Windows and macOS always draw submenu headings. Settings are not in the context menu, only in the main menu and the Command Palette.
 
 ## Safety and limits
 

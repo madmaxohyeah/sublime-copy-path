@@ -59,13 +59,6 @@ def _package_modules():
     return result
 
 
-def _settings_open():
-    return any(
-        (item.file_name() or '').replace('\\', '/').endswith('/Packages/User/Copy Path.sublime-settings')
-        for window in sublime.windows() for item in window.views()
-    )
-
-
 def _snapshot(view=None):
     view = view or _current_view
     if view is None or not view.is_valid():
@@ -88,7 +81,6 @@ def _snapshot(view=None):
         "change_count": view.change_count(),
         "clipboard": sublime.get_clipboard(),
         "syntax": syntax.scope if syntax else None,
-        "settings_open": _settings_open(),
         "monotonic": time.monotonic(),
         "selection_events": list(_selection_events),
         "package_modules": _package_modules(),

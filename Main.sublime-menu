@@ -13,7 +13,7 @@
                 "command": "edit_settings",
                 "args": {
                   "base_file": "${packages}/Copy Path/Copy Path.sublime-settings",
-                  "default": "{\n\t\"json_path_style\": \"jsonpath\"\n}\n"
+                  "default": "// Copy Path user settings: copy only the options you want to change\n// from the left pane. Everything else keeps its default.\n{\n\t$0\n}\n"
                 }
               }
             ]

@@ -18,19 +18,19 @@
     }
   },
   {
-    "caption": "Copy Path: XPath — Prefer Attributes",
+    "caption": "Copy Path: Copy XPath – Prefer Attributes",
     "command": "copy_element_path",
     "args": {
       "style": "xpath_attributes"
     }
   },
   {
-    "caption": "Copy Path: XPath — Positional",
+    "caption": "Copy Path: Copy XPath – Positional",
     "command": "copy_element_path",
     "args": {"style": "xpath_positional"}
   },
   {
-    "caption": "Copy Path: XPath — Prefer Text",
+    "caption": "Copy Path: Copy XPath – Prefer Text",
     "command": "copy_element_path",
     "args": {"style": "xpath_text"}
   },
@@ -39,7 +39,7 @@
     "command": "edit_settings",
     "args": {
       "base_file": "${packages}/Copy Path/Copy Path.sublime-settings",
-      "default": "{\n\t\"json_path_style\": \"jsonpath\"\n}\n"
+      "default": "// Copy Path user settings: copy only the options you want to change\n// from the left pane. Everything else keeps its default.\n{\n\t$0\n}\n"
     }
   }
 ]

@@ -193,12 +193,16 @@ class AdapterTests(unittest.TestCase):
         self.command.run(None)
         self.flush()
         self.assertEqual(self.calls[-1][2:], ('xml', 'xpath_attributes'))
-    def test_submenu_setting_hides_only_explicit_context_copy_choices(self):
+    def test_submenu_setting_hides_only_the_submenu_entries(self):
         self.settings['show_copy_path_as_submenu'] = False
         self.assertTrue(self.command.is_visible(context=True))
         self.assertFalse(self.command.is_visible(style='pointer', context=True))
-        self.assertFalse(self.command.is_enabled(style='pointer', context=True))
         self.assertTrue(self.command.is_visible(style='pointer'))
+    def test_context_menu_setting_hides_only_the_top_level_entry(self):
+        self.settings['show_in_context_menu'] = False
+        self.assertFalse(self.command.is_visible(context=True))
+        self.assertTrue(self.command.is_visible(style='pointer', context=True))
+        self.assertTrue(self.command.is_visible())
     def test_visibility_matrix_preserves_palette_for_all_xml_styles(self):
         self.view.scope = 'text.xml'
         for outer in (True, False):
@@ -207,9 +211,31 @@ class AdapterTests(unittest.TestCase):
                 self.assertEqual(self.command.is_visible(context=True), outer)
                 for style in ('xpath_attributes', 'xpath_positional', 'xpath_text', 'xpath'):
                     with self.subTest(outer=outer, submenu=submenu, style=style):
-                        self.assertEqual(self.command.is_visible(style=style, context=True), outer and submenu)
+                        self.assertEqual(self.command.is_visible(style=style, context=True), submenu)
+                        self.assertTrue(self.command.is_enabled(style=style, context=True))
                         self.assertTrue(self.command.is_visible(style=style))
                 self.assertFalse(self.command.is_visible(style='jsonpath'))
+                self.assertFalse(self.command.is_visible(style='jsonpath', context=True))
+    def test_only_the_entries_for_the_document_type_are_shown(self):
+        for scope, shown in (('source.json', ('jsonpath', 'pointer')), ('source.yaml', ('jsonpath', 'pointer')),
+                             ('text.xml', ('xpath_attributes', 'xpath_positional', 'xpath_text'))):
+            self.view.scope = scope
+            for style in ('jsonpath', 'pointer', 'xpath_attributes', 'xpath_positional', 'xpath_text'):
+                with self.subTest(scope=scope, style=style):
+                    self.assertIs(self.command.is_visible(style=style, context=True), style in shown)
+                    self.assertIs(self.command.is_enabled(style=style, context=True), style in shown)
+    def test_unsupported_documents_grey_out_every_context_entry(self):
+        self.view.scope = 'source.python'
+        self.view.substr = lambda region: self.fail('menus must not parse the buffer')
+        for style in ('auto', 'jsonpath', 'pointer', 'xpath_attributes', 'xpath_positional', 'xpath_text'):
+            with self.subTest(style=style):
+                self.assertTrue(self.command.is_visible(style=style, context=True))
+                self.assertFalse(self.command.is_enabled(style=style, context=True))
+                self.assertFalse(self.command.is_visible(style=style))  # The palette hides them.
+        self.settings.update(show_in_context_menu=False, show_copy_path_as_submenu=False)
+        for style in ('auto', 'jsonpath', 'xpath_text'):
+            with self.subTest(hidden=style):
+                self.assertFalse(self.command.is_visible(style=style, context=True))
     def test_invalid_view_format_falls_back_to_global_format(self):
         self.view.scope = 'text.plain'
         self.settings['format'] = 'yaml'
@@ -290,18 +316,18 @@ class AdapterTests(unittest.TestCase):
         self.assertTrue(self.command.is_visible())
         self.view.widget = 'find:input'
         self.assertFalse(self.command.is_visible())
-    def test_copy_path_as_heading_follows_document_type(self):
+    def test_submenu_heading_follows_only_the_submenu_setting(self):
         menu = self.module.CopyPathMenuCommand(self.view)
         self.view.substr = lambda region: self.fail('menus must not parse the buffer')
-        for scope, expected in (('source.json', True), ('source.yaml', True), ('text.xml', True), ('source.python', False)):
+        for scope in ('source.json', 'source.yaml', 'text.xml', 'source.python'):
             with self.subTest(scope=scope):
                 self.view.scope = scope
-                self.assertIs(menu.is_visible(), expected)
-        self.view.scope = 'source.json'
-        self.settings['show_copy_path_as_submenu'] = False
-        self.assertTrue(menu.is_visible())  # Settings stays reachable inside the heading.
+                self.assertIs(menu.is_visible(), True)
         self.settings['show_in_context_menu'] = False
-        self.assertTrue(menu.is_visible())  # Settings stays reachable to re-enable copying.
+        self.assertTrue(menu.is_visible())
+        self.settings['show_copy_path_as_submenu'] = False
+        self.assertFalse(menu.is_visible())  # Honoured on Linux only.
+        self.settings['show_copy_path_as_submenu'] = True
         self.view.widget = 'find:input'
         self.assertFalse(menu.is_visible())
         self.assertIsNone(menu.run(None))

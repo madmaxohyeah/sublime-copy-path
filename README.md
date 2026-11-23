@@ -8,7 +8,7 @@ Copy the structural path of the element under your mouse or caret—not the file
 - Native right-click menu and Command Palette. Works on unsaved changes, without altering text or selections.
 - Self-contained: no Python installation, network access or telemetry required; Package Control is optional.
 
-Requires **Sublime Text 4** and is tested with build 4215. The plugin runs in Sublime's Python 3.8 plugin host.
+Requires **Sublime Text 4** and is tested with build 4215. The plugin runs in Sublime's Python 3.14 plugin host.
 
 ## Install
 
@@ -25,9 +25,9 @@ Do not put the ZIP inside `Packages/User` or double-click it to install. To upda
 
 ## Use
 
-**Mouse:** right-click the desired key, value, tag or attribute and choose **Copy Element Path**. The clicked position wins, even if the caret is somewhere else. **Copy Path As** exposes compatible explicit formats.
+**Mouse:** right-click the desired key, value, tag or attribute and choose **Copy Element Path**. The clicked position wins, even if the caret is somewhere else. **Copy Element Path As** offers the other formats that fit the file.
 
-**Keyboard:** place one or more carets, open the Command Palette, and choose **Copy Path: Copy Element Path**, **Copy Path: Copy JSONPath**, **Copy Path: Copy JSON Pointer**, or one of the **Copy Path: XPath — …** actions. For a nonempty selection the active end is used, not its beginning. A caret directly after a value, for example after double-clicking it or pressing End, copies that value's path. Multiple carets copy unique paths in selection order, one per line. There are no default keybindings; add one if desired:
+**Keyboard:** place one or more carets, open the Command Palette, and choose **Copy Path: Copy Element Path**, **Copy Path: Copy JSONPath**, **Copy Path: Copy JSON Pointer**, or one of the **Copy Path: Copy XPath – …** actions. For a nonempty selection the active end is used, not its beginning. A caret directly after a value, for example after double-clicking it or pressing End, copies that value's path. Multiple carets copy unique paths in selection order, one per line. There are no default keybindings; add one if desired:
 
 ```json
 { "keys": ["ctrl+alt+c"], "command": "copy_element_path" }
@@ -49,9 +49,9 @@ For macOS, choose an unused `super` combination instead. These are optional exam
 
 On the second `book` tag or its text:
 
-- **Copy Element Path** defaults to **XPath — Prefer Attributes**: `/catalog/book[@id='b']`.
-- **Copy Path As → XPath — Positional**: `/catalog[1]/book[2]`.
-- **Copy Path As → XPath — Prefer Text**: `/catalog/book[.='Title']`.
+- **Copy Element Path** defaults to **XPath – Prefer Attributes**: `/catalog/book[@id='b']`.
+- **Copy Element Path As → XPath – Positional**: `/catalog[1]/book[2]`.
+- **Copy Element Path As → XPath – Prefer Text**: `/catalog/book[.='Title']`.
 - On its `id` name/value, the default is `/catalog/book[@id='b']/@id`—the clicked attribute, not its containing element.
 
 Attribute preference tries `id`, then `xml:id`, then other suitable attributes, checking uniqueness among same-name siblings rather than assuming an `id` is unique. Other attributes are chosen deterministically by expanded name; blank, multiline or longer-than-128-character values are unsuitable. Text preference uses nonblank, single-line leaf-element string values of at most 128 characters and checks against all same-name siblings, including mixed-content elements. Descriptive styles omit unnecessary positions; ambiguous or unsuitable steps fall back to positions. Text preference does not fall back to attribute predicates. Positional mode always includes each element's ordinal. Explicit submenu choices do not change your default.
@@ -86,7 +86,7 @@ Recovery does **not** accept mismatched tags, unfinished tags/quotes/comments/CD
 
 ## Settings
 
-Open **Copy Path As → Settings…**, **Preferences → Package Settings → Copy Path → Settings**, or **Preferences: Copy Path Settings** in the Command Palette. Defaults:
+Open **Preferences → Package Settings → Copy Path → Settings**, or run **Preferences: Copy Path Settings** from the Command Palette. Defaults:
 
 ```json
 {
@@ -102,15 +102,15 @@ Open **Copy Path As → Settings…**, **Preferences → Package Settings → Co
 - `format`: `auto`, `json`, `jsonc`, `xml` or `yaml`. Automatic detection prefers the selected whole-buffer syntax; extension fallback is used for plain text. One targeted exception handles `.xhtml` files assigned Sublime's built-in HTML syntax: these are parsed as XML, while ordinary `.html` remains unsupported. Choose a supported syntax for an untitled buffer.
 - `json_path_style`: `jsonpath` or `pointer`. Affects the automatic action in JSON/YAML only; XML always uses XPath.
 - `xml_path_style`: `attributes` (default), `positional` or `text`. Controls **Copy Element Path** for XML only.
-- `show_in_context_menu`: when `false`, hide **Copy Element Path** and all submenu copy actions, but keep **Copy Path As → Settings…** so copying can be turned back on.
-- `show_copy_path_as_submenu`: when `false`, show only **Settings…** inside **Copy Path As**, while retaining **Copy Element Path** if `show_in_context_menu` is `true`. This controls the submenu's copy choices, not its structural parent: native Windows menus cannot reliably hide an empty parent.
-- Neither visibility setting removes Command Palette actions. In unsupported document types the copy entries are hidden; on Linux the **Copy Path As** heading is hidden too, while Windows and macOS (which always show submenu headings) keep the Settings-only heading.
+- `show_in_context_menu`: when `false`, hide **Copy Element Path** in the right-click menu. The **Copy Element Path As** submenu stays.
+- `show_copy_path_as_submenu`: when `false`, hide the entries inside **Copy Element Path As**. On Windows and macOS the submenu heading can't be hidden; to remove it, see [Right-click menu](#right-click-menu).
+- Neither setting affects the Command Palette.
 - `max_file_chars`: positive integer up to the hard limit. Invalid settings safely fall back to defaults.
 - A view/project setting named `copy_path_format` overrides `format` for that view/project; useful for JSONC files named `.json`.
 
 ## Right-click menu
 
-**Copy Element Path** and **Copy Path As** only appear in JSON, YAML and XML files, and `show_in_context_menu: false` removes the copy actions everywhere. Sublime Text on Windows and macOS still draws the **Copy Path As** heading, with **Settings…** inside, because it can't hide submenu headings there.
+The right-click menu has **Copy Element Path** and the **Copy Element Path As** submenu. In JSON and YAML files the submenu offers JSONPath and JSON Pointer, in XML files the three XPath styles. In other files every entry is shown greyed out. Sublime Text on Windows and macOS always draws the **Copy Element Path As** heading, even when `show_copy_path_as_submenu` is `false`.
 
 To remove the entries completely, or to keep only the ones you use, replace the package's menu file with your own:
 

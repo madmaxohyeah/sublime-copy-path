@@ -10,7 +10,7 @@
     }
   },
   {
-    "caption": "Copy Path As",
+    "caption": "Copy Element Path As",
     "command": "copy_path_menu",
     "children": [
       {
@@ -30,7 +30,7 @@
         }
       },
       {
-        "caption": "XPath — Prefer Attributes",
+        "caption": "XPath – Prefer Attributes",
         "command": "copy_element_path",
         "args": {
           "style": "xpath_attributes",
@@ -38,7 +38,7 @@
         }
       },
       {
-        "caption": "XPath — Positional",
+        "caption": "XPath – Positional",
         "command": "copy_element_path",
         "args": {
           "style": "xpath_positional",
@@ -46,20 +46,11 @@
         }
       },
       {
-        "caption": "XPath — Prefer Text",
+        "caption": "XPath – Prefer Text",
         "command": "copy_element_path",
         "args": {
           "style": "xpath_text",
           "context": true
-        }
-      },
-      {"caption": "-"},
-      {
-        "caption": "Settings…",
-        "command": "edit_settings",
-        "args": {
-          "base_file": "${packages}/Copy Path/Copy Path.sublime-settings",
-          "default": "{\n\t\"json_path_style\": \"jsonpath\"\n}\n"
         }
       }
     ]

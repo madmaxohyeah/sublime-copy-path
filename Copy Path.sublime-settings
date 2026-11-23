@@ -1,8 +1,28 @@
 {
-  "format": "auto",
-  "json_path_style": "jsonpath",
-  "xml_path_style": "attributes",
-  "show_in_context_menu": true,
-  "show_copy_path_as_submenu": true,
-  "max_file_chars": 2000000
+	// Which document type to read the file as. "auto" decides from syntax.
+	// Other values: "json", "jsonc", "yaml" or "xml".
+	"format": "auto",
+
+	// The path that "Copy Element Path" copies in JSON and YAML:
+	// "jsonpath"  $.users[0].name
+	// "pointer"   /users/0/name
+	"json_path_style": "jsonpath",
+
+	// The XPath that "Copy Element Path" copies in XML:
+	// "attributes"  /catalog/book[@id='b']
+	// "positional"  /catalog[1]/book[2]
+	// "text"        /catalog/book[.='Title']
+	"xml_path_style": "attributes",
+
+	// Show "Copy Element Path" in the right-click menu. This affects only that
+	// entry, not the "Copy Element Path As" submenu or the Command Palette.
+	"show_in_context_menu": true,
+
+	// Show the entries inside the "Copy Element Path As" submenu. On Mac
+	// and Windows, the submenu heading cannot be hidden. To remove it,
+	// or to change it in other ways, see "Right-click menu" in the README.
+	"show_copy_path_as_submenu": true,
+
+	// Files longer than this many characters are not read. The maximum is 2000000.
+	"max_file_chars": 2000000
 }

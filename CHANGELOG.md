@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0 — 2026-11-23
+
+- The right-click submenu is now called **Copy Element Path As** and no longer contains **Settings…**. The settings are in **Preferences → Package Settings → Copy Path** and the Command Palette.
+- `show_in_context_menu` now hides only the top-level **Copy Element Path**, and `show_copy_path_as_submenu` only the entries of the submenu.
+- In files that aren't JSON, YAML or XML, the right-click entries are shown greyed out instead of hidden.
+- Opening the settings no longer pre-fills your user settings with `json_path_style`.
+- The default settings file explains every option.
+- Menu and Command Palette captions use an en dash: **XPath – Positional**.
+
 ## 1.1.0 — 2026-11-15
 
 - The package is now called **Copy Path**, with a space, everywhere: in Package Control, in the archive name `Copy Path.sublime-package` and in the settings file `Copy Path.sublime-settings`.

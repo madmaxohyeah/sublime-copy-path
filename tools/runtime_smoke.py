@@ -42,8 +42,8 @@ REQUIRED_CASES = (
     "mouse_auto_xml",
     "mouse_text_xml",
     "incomplete_xml",
-    "mouse_submenu_disabled",
-    "mouse_context_disabled",
+    "mouse_auto_submenu_disabled",
+    "mouse_text_context_disabled",
     "caret_multiple_unicode",
     "yaml_archive_import",
     "malformed_preserves_clipboard",
@@ -56,8 +56,8 @@ EXPECTED_CLIPBOARDS = {
     "mouse_auto_xml": "/catalog/book[@id='b']",
     "mouse_text_xml": "/catalog/book[.='Title']",
     "incomplete_xml": "/catalog[1]/book[2]",
-    "mouse_submenu_disabled": "COPY_PATH_RUNTIME_SENTINEL_mouse_submenu_disabled",
-    "mouse_context_disabled": "COPY_PATH_RUNTIME_SENTINEL_mouse_context_disabled",
+    "mouse_auto_submenu_disabled": "/catalog/book[@id='b']",
+    "mouse_text_context_disabled": "/catalog/book[.='Title']",
     "caret_multiple_unicode": '$.users[0].name\n$["\\u043a\\u043b\\u044e\\u0447"].emoji',
     "yaml_archive_import": "$.root.items[0].city",
     "malformed_preserves_clipboard": "MALFORMED_CLIPBOARD_MUST_SURVIVE",
@@ -236,9 +236,6 @@ def validate_runtime_report(report, expected_archive_sha256, evidence_dir=None):
         raise RuntimeError("malformed-document rejection was not observed")
     if cases['incomplete_xml'].get('status_messages') != ['Copied positional XPath from incomplete XML.']:
         raise RuntimeError('XML recovery warning was not observed')
-    for name in ('mouse_submenu_disabled', 'mouse_context_disabled'):
-        if cases[name].get('settings_open') is not True:
-            raise RuntimeError('Settings menu did not open package settings')
     modules = yaml_case.get("yaml_modules", {})
     if (yaml_case.get("yaml_imports_from_archive") is not True
             or "Copy Path.copy_path_lib.vendor.yaml.parser" not in modules
@@ -351,8 +348,6 @@ def run_self_tests():
             case["status_messages"] = ["Invalid JSON document."]
         if name == 'incomplete_xml':
             case['status_messages'] = ['Copied positional XPath from incomplete XML.']
-        if name in ('mouse_submenu_disabled', 'mouse_context_disabled'):
-            case['settings_open'] = True
     validate_runtime_report(report, digest)
     broken = dict(report)
     broken["cleanup_issues"] = ["editor did not stop"]
@@ -748,26 +743,16 @@ def _native_case(
         submenu_path = output / submenu_name
         _capture_screenshot(display, submenu_path)
         if menu_style == "pointer":
-            submenu_box = _detect_submenu(submenu_path, root_box, 1, 2)
+            submenu_box = _detect_submenu(submenu_path, root_box, parent_row, 2)
             action_point = menu_row_point(submenu_box, 1)
         elif menu_style in ('xpath', 'xpath_text'):
-            submenu_box = _detect_submenu(submenu_path, root_box, 1, 4)
+            submenu_box = _detect_submenu(submenu_path, root_box, parent_row, 3)
             action_point = menu_row_point(submenu_box, 1 if menu_style == 'xpath' else 2)
-        elif menu_style == 'settings':
-            submenu_box = _detect_submenu(submenu_path, root_box, parent_row, 1)
-            action_point = menu_row_point(submenu_box, 0)
         else:
             raise RuntimeError("unsupported native menu style {}".format(menu_style))
     menu_action_time = time.monotonic()
     _click_absolute(display, action_point)
     after = _wait_for_clipboard(client, expected)
-    if menu_style == 'settings':
-        deadline = time.monotonic() + 5.0
-        while not after.get('settings_open') and time.monotonic() < deadline:
-            time.sleep(0.08)
-            after = client.request('snapshot')
-        if not after.get('settings_open'):
-            raise RuntimeError('Settings menu did not open package settings')
     events = after.get("selection_events", [])
     menu_state = None
     if (
@@ -817,7 +802,6 @@ def _native_case(
         "submenu_box": None if submenu_box is None else list(submenu_box),
         "menu_action_screen": list(action_point),
         "screenshots": screenshots,
-        "settings_open": after.get('settings_open', False),
     }
 
 
@@ -1166,14 +1150,15 @@ def run_acceptance(args):
                     "status_messages": after.get("status_messages", []),
                 }
             report["cases"].append(malformed_case)
-            for name, settings in [
-                ('mouse_submenu_disabled', {'show_copy_path_as_submenu': False}),
-                ('mouse_context_disabled', {'show_in_context_menu': False}),
+            # Each visibility setting hides only its own part of the menu.
+            for name, style, settings in [
+                ('mouse_auto_submenu_disabled', 'auto', {'show_copy_path_as_submenu': False}),
+                ('mouse_text_context_disabled', 'xpath_text', {'show_in_context_menu': False}),
             ]:
                 report['cases'].append(_native_case(
                     client, display, window_id, output, name, books,
                     'Packages/XML/XML.sublime-syntax', [[1, 1]], books.index('Title'),
-                    EXPECTED_CLIPBOARDS[name], 'settings', settings=settings))
+                    EXPECTED_CLIPBOARDS[name], style, settings=settings))
             client.request("close", timeout=3.0)
 
             report.update(

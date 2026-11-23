@@ -57,16 +57,6 @@ class DriverCompletionTests(unittest.TestCase):
         self.assertEqual(payload['status_messages'], [])
         self.assertIs(self.product._message, self.forward)
 
-    def test_settings_detection_checks_the_separate_settings_window(self):
-        self.assertTrue(hasattr(self.driver, '_settings_open'))
-        original = types.SimpleNamespace(views=lambda: [])
-        settings_view = types.SimpleNamespace(file_name=lambda: '/profile/Data/Packages/User/Copy Path.sublime-settings')
-        separate = types.SimpleNamespace(views=lambda: [settings_view])
-        self.driver.sublime.windows = lambda: [original, separate]
-        self.assertTrue(self.driver._settings_open())
-        settings_view.file_name = lambda: '/profile/Data/Packages/User/Other.sublime-settings'
-        self.assertFalse(self.driver._settings_open())
-
     def test_command_exception_restores_the_original_message_function(self):
         self.view.run_command.side_effect = RuntimeError('command failed')
         with self.assertRaisesRegex(RuntimeError, 'command failed'):
