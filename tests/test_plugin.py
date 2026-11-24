@@ -194,12 +194,12 @@ class AdapterTests(unittest.TestCase):
         self.flush()
         self.assertEqual(self.calls[-1][2:], ('xml', 'xpath_attributes'))
     def test_submenu_setting_hides_only_the_submenu_entries(self):
-        self.settings['show_copy_path_as_submenu'] = False
+        self.settings['show_submenu_copy_element_path_as'] = False
         self.assertTrue(self.command.is_visible(context=True))
         self.assertFalse(self.command.is_visible(style='pointer', context=True))
         self.assertTrue(self.command.is_visible(style='pointer'))
     def test_context_menu_setting_hides_only_the_top_level_entry(self):
-        self.settings['show_in_context_menu'] = False
+        self.settings['show_copy_element_path'] = False
         self.assertFalse(self.command.is_visible(context=True))
         self.assertTrue(self.command.is_visible(style='pointer', context=True))
         self.assertTrue(self.command.is_visible())
@@ -207,7 +207,7 @@ class AdapterTests(unittest.TestCase):
         self.view.scope = 'text.xml'
         for outer in (True, False):
             for submenu in (True, False):
-                self.settings.update(show_in_context_menu=outer, show_copy_path_as_submenu=submenu)
+                self.settings.update(show_copy_element_path=outer, show_submenu_copy_element_path_as=submenu)
                 self.assertEqual(self.command.is_visible(context=True), outer)
                 for style in ('xpath_attributes', 'xpath_positional', 'xpath_text', 'xpath'):
                     with self.subTest(outer=outer, submenu=submenu, style=style):
@@ -232,7 +232,7 @@ class AdapterTests(unittest.TestCase):
                 self.assertTrue(self.command.is_visible(style=style, context=True))
                 self.assertFalse(self.command.is_enabled(style=style, context=True))
                 self.assertFalse(self.command.is_visible(style=style))  # The palette hides them.
-        self.settings.update(show_in_context_menu=False, show_copy_path_as_submenu=False)
+        self.settings.update(show_copy_element_path=False, show_submenu_copy_element_path_as=False)
         for style in ('auto', 'jsonpath', 'xpath_text'):
             with self.subTest(hidden=style):
                 self.assertFalse(self.command.is_visible(style=style, context=True))
@@ -247,7 +247,7 @@ class AdapterTests(unittest.TestCase):
     def test_bad_visibility_and_xml_settings_use_safe_defaults(self):
         self.view.scope = 'text.xml'
         for bad in ('false', 0, 1, None, [], {}):
-            self.settings.update(show_in_context_menu=bad, show_copy_path_as_submenu=bad, xml_path_style=bad)
+            self.settings.update(show_copy_element_path=bad, show_submenu_copy_element_path_as=bad, xml_path_style=bad)
             self.assertTrue(self.command.is_visible(style='xpath_attributes', context=True))
             self.command.run(None)
             self.flush()
@@ -307,7 +307,7 @@ class AdapterTests(unittest.TestCase):
         self.view.substr = lambda region: self.fail('menus must not parse the buffer')
         self.assertTrue(self.command.is_visible())
         self.assertFalse(self.command.is_visible(style='xpath'))
-        self.settings['show_in_context_menu'] = False
+        self.settings['show_copy_element_path'] = False
         self.assertFalse(self.command.is_visible(context=True))
         self.assertTrue(self.command.is_visible())
         self.view.scope = 'source.python'
@@ -323,11 +323,11 @@ class AdapterTests(unittest.TestCase):
             with self.subTest(scope=scope):
                 self.view.scope = scope
                 self.assertIs(menu.is_visible(), True)
-        self.settings['show_in_context_menu'] = False
+        self.settings['show_copy_element_path'] = False
         self.assertTrue(menu.is_visible())
-        self.settings['show_copy_path_as_submenu'] = False
+        self.settings['show_submenu_copy_element_path_as'] = False
         self.assertFalse(menu.is_visible())  # Honoured on Linux only.
-        self.settings['show_copy_path_as_submenu'] = True
+        self.settings['show_submenu_copy_element_path_as'] = True
         self.view.widget = 'find:input'
         self.assertFalse(menu.is_visible())
         self.assertIsNone(menu.run(None))

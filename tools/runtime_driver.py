@@ -136,7 +136,7 @@ def _setup(request_id, request):
         previous.close()
     window.set_layout({'cols': [0.0, 1.0], 'rows': [0.0, 1.0], 'cells': [[0, 0, 1, 1]]})
     settings = sublime.load_settings('Copy Path.sublime-settings')
-    for key in ('show_in_context_menu', 'show_copy_path_as_submenu', 'xml_path_style'):
+    for key in ('show_copy_element_path', 'show_submenu_copy_element_path_as', 'xml_path_style'):
         settings.erase(key)
     for key, value in request.get('settings', {}).items():
         settings.set(key, value)

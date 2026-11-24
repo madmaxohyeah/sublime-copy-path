@@ -37,10 +37,10 @@ def _config(view):
     limit = settings.get('max_file_chars', MAX_CHARS)
     if type(limit) is not int or not 1 <= limit <= MAX_CHARS:
         limit = MAX_CHARS
-    visible = settings.get('show_in_context_menu', True)
+    visible = settings.get('show_copy_element_path', True)
     if type(visible) is not bool:
         visible = True
-    submenu = settings.get('show_copy_path_as_submenu', True)
+    submenu = settings.get('show_submenu_copy_element_path_as', True)
     if type(submenu) is not bool:
         submenu = True
     return _Config(override, style, xml_style, limit, visible, submenu)
@@ -65,7 +65,7 @@ class CopyPathMenuCommand(sublime_plugin.TextCommand):
     """Visibility of the Copy Element Path As submenu heading; running it does nothing.
 
     Only Linux asks a submenu heading whether it is visible: there the heading
-    disappears when show_copy_path_as_submenu is false. Windows and macOS
+    disappears when show_submenu_copy_element_path_as is false. Windows and macOS
     always draw it; the README explains how to replace the menu instead.
     """
 
@@ -81,8 +81,8 @@ class CopyElementPathCommand(sublime_plugin.TextCommand):
 
     ``context`` is true only for context-menu entries, so the visibility
     settings never hide Command Palette actions. In the context menu,
-    show_in_context_menu controls the top-level entry and
-    show_copy_path_as_submenu the submenu entries. Entries that don't fit the
+    show_copy_element_path controls the top-level entry and
+    show_submenu_copy_element_path_as the submenu entries. Entries that don't fit the
     document are hidden; in a document that isn't JSON, YAML or XML, every
     entry is shown greyed out instead. Parsing runs on the async thread; a
     newer request, an edit, a selection change or a tab switch discards the

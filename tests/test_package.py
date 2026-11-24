@@ -65,16 +65,16 @@ class PackageTests(unittest.TestCase):
     def test_every_setting_is_documented_in_the_default_file(self):
         lines = (ROOT / 'Copy Path.sublime-settings').read_text(encoding='utf-8').splitlines()
         settings = load_settings()
-        self.assertEqual(list(settings), ['format', 'json_path_style', 'xml_path_style', 'show_in_context_menu',
-                                          'show_copy_path_as_submenu', 'max_file_chars'])
+        self.assertEqual(list(settings), ['format', 'json_path_style', 'xml_path_style', 'show_copy_element_path',
+                                          'show_submenu_copy_element_path_as', 'max_file_chars'])
         for key in settings:
             index = next(i for i, line in enumerate(lines) if line.strip().startswith('"{}"'.format(key)))
             with self.subTest(key=key):
                 self.assertTrue(lines[index - 1].strip().startswith('//'))
     def test_xpath_and_menu_defaults_are_shipped(self):
         settings = load_settings()
-        self.assertIs(settings.get('show_in_context_menu'), True)
-        self.assertIs(settings.get('show_copy_path_as_submenu'), True)
+        self.assertIs(settings.get('show_copy_element_path'), True)
+        self.assertIs(settings.get('show_submenu_copy_element_path_as'), True)
         self.assertEqual(settings.get('xml_path_style'), 'attributes')
         actions = json.loads((ROOT / 'Default.sublime-commands').read_text(encoding='utf-8'))
         styles = [item.get('args', {}).get('style') for item in actions]

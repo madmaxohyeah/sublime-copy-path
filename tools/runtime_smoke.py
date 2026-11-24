@@ -732,7 +732,7 @@ def _native_case(
     if menu_style == "auto":
         action_point = menu_row_point(root_box, 0)
     else:
-        parent_row = 0 if settings and settings.get('show_in_context_menu') is False else 1
+        parent_row = 0 if settings and settings.get('show_copy_element_path') is False else 1
         parent_point = menu_row_point(root_box, parent_row)
         _run_xdotool(
             display,
@@ -1152,8 +1152,8 @@ def run_acceptance(args):
             report["cases"].append(malformed_case)
             # Each visibility setting hides only its own part of the menu.
             for name, style, settings in [
-                ('mouse_auto_submenu_disabled', 'auto', {'show_copy_path_as_submenu': False}),
-                ('mouse_text_context_disabled', 'xpath_text', {'show_in_context_menu': False}),
+                ('mouse_auto_submenu_disabled', 'auto', {'show_submenu_copy_element_path_as': False}),
+                ('mouse_text_context_disabled', 'xpath_text', {'show_copy_element_path': False}),
             ]:
                 report['cases'].append(_native_case(
                     client, display, window_id, output, name, books,

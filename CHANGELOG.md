@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.2.0 — 2026-11-23
+## 1.3.0 – 2026-11-24
+
+- The right-click menu settings have clearer names: `show_in_context_menu` is now `show_copy_element_path`, and `show_copy_path_as_submenu` is now `show_submenu_copy_element_path_as`.
+
+## 1.2.0 – 2026-11-23
 
 - The right-click submenu is now called **Copy Element Path As** and no longer contains **Settings…**. The settings are in **Preferences → Package Settings → Copy Path** and the Command Palette.
 - `show_in_context_menu` now hides only the top-level **Copy Element Path**, and `show_copy_path_as_submenu` only the entries of the submenu.
@@ -9,15 +13,15 @@
 - The default settings file explains every option.
 - Menu and Command Palette captions use an en dash: **XPath – Positional**.
 
-## 1.1.0 — 2026-11-15
+## 1.1.0 – 2026-11-15
 
 - The package is now called **Copy Path**, with a space, everywhere: in Package Control, in the archive name `Copy Path.sublime-package` and in the settings file `Copy Path.sublime-settings`.
 
-## 1.0.1 — 2026-11-15
+## 1.0.1 – 2026-11-15
 
 - The README explains how to remove or customize the right-click menu by replacing the package's `Context.sublime-menu`.
 
-## 1.0.0 — 2026-11-13
+## 1.0.0 – 2026-11-13
 
 First public release.
 
