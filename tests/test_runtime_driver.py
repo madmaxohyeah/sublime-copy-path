@@ -57,6 +57,19 @@ class DriverCompletionTests(unittest.TestCase):
         self.assertEqual(payload['status_messages'], [])
         self.assertIs(self.product._message, self.forward)
 
+    def test_module_listing_covers_the_plugin_and_pyyaml(self):
+        modules = {
+            'Copy Path.copy_path': types.SimpleNamespace(__file__='/archive/copy_path.py'),
+            'yaml': types.SimpleNamespace(__file__='/Lib/python314/yaml/__init__.py'),
+            'yaml.parser': types.SimpleNamespace(__file__='/Lib/python314/yaml/parser.py'),
+            'yamlish': types.SimpleNamespace(__file__='/elsewhere/yamlish.py'),
+            'Copy Pathology': types.SimpleNamespace(__file__='/elsewhere/other.py'),
+        }
+        with patch.dict(sys.modules, modules):
+            listed = self.driver._package_modules()
+        self.assertEqual(sorted(name for name in listed if name in modules),
+                         ['Copy Path.copy_path', 'yaml', 'yaml.parser'])
+
     def test_command_exception_restores_the_original_message_function(self):
         self.view.run_command.side_effect = RuntimeError('command failed')
         with self.assertRaisesRegex(RuntimeError, 'command failed'):

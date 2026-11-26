@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the self-contained Copy Path archive reproducibly on every platform."""
+"""Build the Copy Path archive reproducibly on every platform."""
 import argparse
 import hashlib
 import io
@@ -24,16 +24,7 @@ PACKAGE_FILES = (
     'copy_path_lib/paths.py',
     'copy_path_lib/xml_parser.py',
     'copy_path_lib/yaml_parser.py',
-    'copy_path_lib/vendor/__init__.py',
-    'copy_path_lib/vendor/yaml/LICENSE',
-    'copy_path_lib/vendor/yaml/PROVENANCE.md',
-    'copy_path_lib/vendor/yaml/__init__.py',
-    'copy_path_lib/vendor/yaml/error.py',
-    'copy_path_lib/vendor/yaml/events.py',
-    'copy_path_lib/vendor/yaml/parser.py',
-    'copy_path_lib/vendor/yaml/reader.py',
-    'copy_path_lib/vendor/yaml/scanner.py',
-    'copy_path_lib/vendor/yaml/tokens.py',
+    'dependencies.json',
 )
 
 

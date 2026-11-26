@@ -17,10 +17,3 @@
 /docs/** export-ignore
 /tools export-ignore
 /tools/** export-ignore
-
-# Preserve byte-identical upstream PyYAML files (hash-checked by tests).
-copy_path_lib/vendor/yaml/error.py whitespace=-blank-at-eof
-copy_path_lib/vendor/yaml/events.py whitespace=-blank-at-eof
-copy_path_lib/vendor/yaml/parser.py whitespace=-blank-at-eof,-blank-at-eol
-copy_path_lib/vendor/yaml/scanner.py whitespace=-blank-at-eol
-copy_path_lib/vendor/yaml/tokens.py whitespace=-blank-at-eof

@@ -1,7 +1,7 @@
-import hashlib
-from pathlib import Path
 import unittest
 from unittest import mock
+
+import yaml
 
 from copy_path_lib.model import PathError
 from copy_path_lib.yaml_parser import parse
@@ -252,27 +252,16 @@ class YamlParserTests(unittest.TestCase):
         with self.assertRaisesRegex(PathError, "50,000-node"):
             parse(too_many_nodes)
 
-    def test_vendored_pyyaml_files_match_verified_upstream_bytes(self):
-        vendor = Path(__file__).parents[1] / "copy_path_lib" / "vendor" / "yaml"
-        expected = {
-            "LICENSE": "8d3928f9dc4490fd635707cb88eb26bd764102a7282954307d3e5167a577e8a4",
-            "error.py": "021f73fada072546c4f63f8cf18a7181244ce4280b09cc15cc980b2d1176171a",
-            "events.py": "e74fd392c810884e2ea7e94aa3f57e9c1cbeb402319083d0c58e6a0e1282787c",
-            "parser.py": "8a55a9e6fbe0a07146cef3990c8b45a068c3e83e369e1959ad9ca30306b4a09a",
-            "reader.py": "d1d9b38ab3a20c6e17a38d519ee412ecaf6b918df18c78956ac7c330d4ea08dc",
-            "scanner.py": "60433788b652690c17710460da5d91e0c753d3318fd85f5e1e42862a71f25906",
-            "tokens.py": "953408cd2570f0c83dc2fe39f7e4e388e41eeb05738aa69196a5f6ffcf6ba79e",
-        }
 
-        for name, digest in expected.items():
-            with self.subTest(name=name):
-                self.assertEqual(hashlib.sha256((vendor / name).read_bytes()).hexdigest(), digest)
-
-        provenance = (vendor / "PROVENANCE.md").read_text(encoding="utf-8")
-        self.assertIn("PyYAML", provenance)
-        self.assertIn("6.0.3", provenance)
-        self.assertIn("d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f", provenance)
-        self.assertIn("2026-09-26", provenance)
+    def test_the_loader_is_disposed_when_parsing_stops_early(self):
+        for text in ("a: 1\na: 2\n", "a: 1\n"):
+            with self.subTest(text=text):
+                with mock.patch.object(yaml.SafeLoader, "dispose", autospec=True) as dispose:
+                    try:
+                        parse(text)
+                    except PathError:
+                        pass
+                self.assertEqual(dispose.call_count, 1)
 
 
 if __name__ == "__main__":

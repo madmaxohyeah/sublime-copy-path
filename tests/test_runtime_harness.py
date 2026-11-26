@@ -2,7 +2,6 @@
 import copy
 import hashlib
 import importlib.util
-import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -30,7 +29,7 @@ class RuntimeReportTests(unittest.TestCase):
             'mouse_auto_submenu_disabled': "/catalog/book[@id='b']",
             'mouse_text_context_disabled': "/catalog/book[.='Title']",
             'caret_multiple_unicode': '$.users[0].name\n$["\\u043a\\u043b\\u044e\\u0447"].emoji',
-            'yaml_archive_import': '$.root.items[0].city',
+            'yaml_library_import': '$.root.items[0].city',
             'malformed_preserves_clipboard': 'MALFORMED_CLIPBOARD_MUST_SURVIVE',
         }
         cases = []
@@ -47,9 +46,13 @@ class RuntimeReportTests(unittest.TestCase):
                     data = b'synthetic screenshot fixture'
                     (self.evidence / filename).write_bytes(data)
                     case['screenshots'].append({'file': filename, 'sha256': hashlib.sha256(data).hexdigest()})
-            if name == 'yaml_archive_import':
-                case['yaml_imports_from_archive'] = True
-                case['yaml_modules'] = {'Copy Path.copy_path_lib.vendor.yaml.parser': '/Copy Path.sublime-package/copy_path_lib/vendor/yaml/parser.py'}
+            if name == 'yaml_library_import':
+                case['yaml_from_library'] = True
+                case['yaml_modules'] = {
+                    'Copy Path.copy_path_lib.yaml_parser': '/Data/Installed Packages/Copy Path.sublime-package/copy_path_lib/yaml_parser.py',
+                    'yaml': '/Data/Lib/python314/yaml/__init__.py',
+                    'yaml.parser': '/Data/Lib/python314/yaml/parser.py',
+                }
             if name == 'malformed_preserves_clipboard':
                 case['status_messages'] = ['Invalid JSON document.']
             if name == 'incomplete_xml':
@@ -156,12 +159,15 @@ class RuntimeReportTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'source'):
             runtime.validate_runtime_report(report, self.digest)
 
-    def test_nonarchive_yaml_imports_are_rejected(self):
-        report = copy.deepcopy(self.report)
-        yaml = next(case for case in report['cases'] if case['name'] == 'yaml_archive_import')
-        yaml['yaml_modules'] = {'yaml.parser': '/source-checkout/yaml/parser.py'}
-        with self.assertRaisesRegex(RuntimeError, 'YAML'):
-            runtime.validate_runtime_report(report, self.digest)
+    def test_yaml_must_use_the_library_folder_and_the_archive(self):
+        for module, path in [('yaml.parser', '/usr/lib/python3/dist-packages/yaml/parser.py'),
+                             ('Copy Path.copy_path_lib.yaml_parser', '/source-checkout/copy_path_lib/yaml_parser.py')]:
+            with self.subTest(module=module):
+                report = copy.deepcopy(self.report)
+                yaml = next(case for case in report['cases'] if case['name'] == 'yaml_library_import')
+                yaml['yaml_modules'][module] = path
+                with self.assertRaisesRegex(RuntimeError, 'YAML'):
+                    runtime.validate_runtime_report(report, self.digest)
 
     def test_missing_screenshot_metadata_is_rejected(self):
         self.report['cases'][0]['screenshots'] = []

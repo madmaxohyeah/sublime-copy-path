@@ -1,0 +1,3 @@
+# The tests import PyYAML, which Sublime Text gets from Package Control's
+# pyyaml library: 6.0.4 for Python 3.14.
+pyyaml==6.0.4

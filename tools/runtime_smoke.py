@@ -4,7 +4,9 @@
 The runner accepts the official Linux tarball and the already-built
 ``dist/Copy Path.sublime-package``. It extracts Sublime into a disposable
 portable directory, refuses any pre-existing ``Data`` directory, installs only
-the exact package archive, and copies the probe into a separate test package.
+the exact package archive, unpacks the pinned ``pyyaml`` wheel (``--pyyaml-wheel``)
+into ``Data/Lib/python314`` as Package Control would, and copies the probe into a
+separate test package.
 
 Linux dependencies are documented in ``tools/Dockerfile.runtime``. The editor
 runs under a private Xvfb display; no live user desktop or profile is touched.
@@ -27,6 +29,7 @@ import tarfile
 import tempfile
 import time
 import uuid
+import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +37,12 @@ EXPECTED_BUILD = "4215"
 EXPECTED_SUBLIME_ARCHIVE_SHA256 = (
     "c153f418d3ab26b90ecce8c02a82e4e961025ed7a65f7e25060a5457d43e88d9"
 )
+# The pyyaml library that Package Control installs for Sublime Text 4215 on
+# Linux x64 (channel_v4.json), unpacked into Data/Lib/python314 like Package Control does.
+PYYAML_WHEEL = "pyyaml-6.0.4-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+PYYAML_WHEEL_SHA256 = "c604dc2613c417130479cdd6e55c2faa691b6365aa82b3dafddfcecc2eaf1ac7"
+YAML_PLUGIN_MODULE = "Copy Path.copy_path_lib.yaml_parser"
+PYYAML_LIBRARY_DIR = "/Data/Lib/python314/yaml/"
 STRIPPED_EDITOR_ENV = ("LD_LIBRARY_PATH", "PYTHONHOME", "PYTHONPATH")
 REQUIRED_CASES = (
     "mouse_auto_json",
@@ -45,7 +54,7 @@ REQUIRED_CASES = (
     "mouse_auto_submenu_disabled",
     "mouse_text_context_disabled",
     "caret_multiple_unicode",
-    "yaml_archive_import",
+    "yaml_library_import",
     "malformed_preserves_clipboard",
 )
 MENU_ROW_HEIGHT = 26
@@ -59,7 +68,7 @@ EXPECTED_CLIPBOARDS = {
     "mouse_auto_submenu_disabled": "/catalog/book[@id='b']",
     "mouse_text_context_disabled": "/catalog/book[.='Title']",
     "caret_multiple_unicode": '$.users[0].name\n$["\\u043a\\u043b\\u044e\\u0447"].emoji',
-    "yaml_archive_import": "$.root.items[0].city",
+    "yaml_library_import": "$.root.items[0].city",
     "malformed_preserves_clipboard": "MALFORMED_CLIPBOARD_MUST_SURVIVE",
 }
 
@@ -115,7 +124,24 @@ def extract_sublime_archive(archive_path, destination):
     return sublime_dir
 
 
-def prepare_profile(sublime_dir, package_archive, driver_path, evidence):
+def install_pyyaml(wheel, data, expected_sha256=PYYAML_WHEEL_SHA256):
+    """Unpack the pyyaml library where Package Control puts it for Python 3.14."""
+    if sha256_file(wheel) != expected_sha256:
+        raise RuntimeError("pyyaml wheel checksum does not match the pinned library")
+    target = data / "Lib" / "python314"
+    target.mkdir(parents=True)
+    root = target.resolve()
+    with zipfile.ZipFile(str(wheel)) as archive:
+        for name in archive.namelist():
+            if root not in (root / name).resolve().parents:
+                raise RuntimeError("pyyaml wheel member escapes the library folder")
+        archive.extractall(str(target))
+    if not (target / "yaml" / "parser.py").is_file():
+        raise RuntimeError("pyyaml wheel does not contain yaml/parser.py")
+
+
+def prepare_profile(sublime_dir, package_archive, driver_path, evidence, pyyaml_wheel,
+                    pyyaml_sha256=PYYAML_WHEEL_SHA256):
     del evidence  # Kept in the signature to make the profile/evidence binding explicit.
     sublime_dir = Path(sublime_dir).resolve()
     package_archive = Path(package_archive).resolve()
@@ -131,6 +157,7 @@ def prepare_profile(sublime_dir, package_archive, driver_path, evidence):
     user.mkdir(parents=True)
     shutil.copyfile(str(package_archive), str(installed / "Copy Path.sublime-package"))
     shutil.copyfile(str(driver_path), str(probe / "runtime_driver.py"))
+    install_pyyaml(Path(pyyaml_wheel).resolve(), data, pyyaml_sha256)
     preferences = {
         "animation_enabled": False,
         "font_size": 18,
@@ -160,6 +187,19 @@ def adjust_window_target(target, frame_extents):
     """Translate Sublime client coordinates for xdotool's framed window origin."""
     left, _right, top, _bottom = frame_extents
     return int(round(target["x"] + left)), int(round(target["y"] + top))
+
+
+def yaml_from_library(modules):
+    """True if YAML was parsed by the installed archive with PyYAML from Data/Lib/python314."""
+    plugin = modules.get(YAML_PLUGIN_MODULE)
+    library = {name: path for name, path in modules.items() if name == "yaml" or name.startswith("yaml.")}
+    return (
+        isinstance(plugin, str)
+        and "Copy Path.sublime-package/" in plugin.replace("\\", "/")
+        and "yaml.parser" in library
+        and all(isinstance(path, str) and PYYAML_LIBRARY_DIR in path.replace("\\", "/")
+                for path in library.values())
+    )
 
 
 def validate_runtime_report(report, expected_archive_sha256, evidence_dir=None):
@@ -231,17 +271,13 @@ def validate_runtime_report(report, expected_archive_sha256, evidence_dir=None):
                     path = Path(evidence_dir) / shot["file"]
                     if not path.is_file() or path.is_symlink() or sha256_file(path) != digest:
                         raise RuntimeError("retained screenshot missing or changed: {}".format(shot["file"]))
-    yaml_case = cases["yaml_archive_import"]
+    yaml_case = cases["yaml_library_import"]
     if cases["malformed_preserves_clipboard"].get("status_messages") != ["Invalid JSON document."]:
         raise RuntimeError("malformed-document rejection was not observed")
     if cases['incomplete_xml'].get('status_messages') != ['Copied positional XPath from incomplete XML.']:
         raise RuntimeError('XML recovery warning was not observed')
-    modules = yaml_case.get("yaml_modules", {})
-    if (yaml_case.get("yaml_imports_from_archive") is not True
-            or "Copy Path.copy_path_lib.vendor.yaml.parser" not in modules
-            or not all(isinstance(path, str) and "Copy Path.sublime-package/" in path
-                       for path in modules.values())):
-        raise RuntimeError("YAML modules were not imported from the installed archive")
+    if yaml_case.get("yaml_from_library") is not True or not yaml_from_library(yaml_case.get("yaml_modules", {})):
+        raise RuntimeError("YAML was not parsed by the installed archive with the pyyaml library")
 
 
 def run_self_tests():
@@ -277,18 +313,52 @@ def run_self_tests():
         driver.write_text("# probe\n", encoding="utf-8")
         evidence = temporary_root / "evidence"
         evidence.mkdir()
-        data = prepare_profile(sublime_dir, package, driver, evidence)
+        wheel = temporary_root / "pyyaml.whl"
+        with zipfile.ZipFile(str(wheel), "w") as archive:
+            archive.writestr("yaml/__init__.py", "")
+            archive.writestr("yaml/parser.py", "")
+        wheel_sha256 = sha256_file(wheel)
+        data = prepare_profile(sublime_dir, package, driver, evidence, wheel, wheel_sha256)
         assert sorted(path.name for path in (data / "Installed Packages").iterdir()) == [
             "Copy Path.sublime-package"
         ]
         assert not (data / "Packages" / "Copy Path").exists()
+        assert (data / "Lib" / "python314" / "yaml" / "parser.py").is_file()
         try:
-            prepare_profile(sublime_dir, package, driver, evidence)
+            prepare_profile(sublime_dir, package, driver, evidence, wheel, wheel_sha256)
         except RuntimeError as error:
             assert "existing Data" in str(error)
         else:
             raise AssertionError("existing portable Data directory was accepted")
     checks.append("fresh archive-only portable profile")
+
+    with tempfile.TemporaryDirectory() as temporary:
+        temporary_root = Path(temporary)
+        data = temporary_root / "Data"
+        escape = temporary_root / "escape.whl"
+        with zipfile.ZipFile(str(escape), "w") as archive:
+            archive.writestr("../outside.py", "")
+        try:
+            install_pyyaml(escape, data, sha256_file(escape))
+        except RuntimeError as error:
+            assert "escapes" in str(error)
+        else:
+            raise AssertionError("pyyaml wheel member outside the library folder was accepted")
+        try:
+            install_pyyaml(escape, temporary_root / "Other", "0" * 64)
+        except RuntimeError as error:
+            assert "checksum" in str(error)
+        else:
+            raise AssertionError("unpinned pyyaml wheel was accepted")
+        assert yaml_from_library({
+            YAML_PLUGIN_MODULE: "/Data/Installed Packages/Copy Path.sublime-package/copy_path_lib/yaml_parser.py",
+            "yaml.parser": "/Data/Lib/python314/yaml/parser.py",
+        })
+        assert not yaml_from_library({
+            YAML_PLUGIN_MODULE: "/Data/Installed Packages/Copy Path.sublime-package/copy_path_lib/yaml_parser.py",
+            "yaml.parser": "/usr/lib/python3/dist-packages/yaml/parser.py",
+        })
+    checks.append("pinned pyyaml library install")
 
     with tempfile.TemporaryDirectory() as temporary:
         temporary_root = Path(temporary)
@@ -338,11 +408,13 @@ def run_self_tests():
                 {"file": name + "-" + suffix + ".png", "sha256": digest}
                 for suffix in suffixes
             ]
-        if name == "yaml_archive_import":
-            case["yaml_imports_from_archive"] = True
+        if name == "yaml_library_import":
+            case["yaml_from_library"] = True
             case["yaml_modules"] = {
-                "Copy Path.copy_path_lib.vendor.yaml.parser":
-                    "/Copy Path.sublime-package/copy_path_lib/vendor/yaml/parser.py"
+                YAML_PLUGIN_MODULE:
+                    "/portable/Data/Installed Packages/Copy Path.sublime-package/copy_path_lib/yaml_parser.py",
+                "yaml": "/portable/Data/Lib/python314/yaml/__init__.py",
+                "yaml.parser": "/portable/Data/Lib/python314/yaml/parser.py",
             }
         if name == "malformed_preserves_clipboard":
             case["status_messages"] = ["Invalid JSON document."]
@@ -903,7 +975,10 @@ def _start_xvfb(log_handle, processes):
 def run_acceptance(args):
     package_archive = args.archive.resolve()
     sublime_archive = args.sublime_archive.resolve()
+    pyyaml_wheel = args.pyyaml_wheel.resolve()
     driver = (ROOT / "tools" / "runtime_driver.py").resolve()
+    if not pyyaml_wheel.is_file():
+        raise RuntimeError("pyyaml wheel is missing: {}".format(pyyaml_wheel))
     if not package_archive.is_file():
         raise RuntimeError("candidate archive is missing: {}".format(package_archive))
     if package_archive.name != "Copy Path.sublime-package":
@@ -943,7 +1018,7 @@ def run_acceptance(args):
     }
     try:
         sublime_dir = extract_sublime_archive(sublime_archive, work / "portable")
-        prepare_profile(sublime_dir, package_archive, driver, protocol)
+        prepare_profile(sublime_dir, package_archive, driver, protocol, pyyaml_wheel)
         binary = sublime_dir / "sublime_text"
         log_path = output / "editor.log"
         with log_path.open("w", encoding="utf-8") as log:
@@ -1093,7 +1168,7 @@ def run_acceptance(args):
             yaml_text = "root:\n  items:\n    - name: Ada\n      city: Zürich\n"
             yaml_case = _command_case(
                 client,
-                "yaml_archive_import",
+                "yaml_library_import",
                 yaml_text,
                 "Packages/YAML/YAML.sublime-syntax",
                 [[yaml_text.index("Zürich"), yaml_text.index("Zürich")]],
@@ -1106,10 +1181,8 @@ def run_acceptance(args):
                 if "yaml" in name.lower()
             }
             yaml_case["yaml_modules"] = yaml_paths
-            yaml_case["yaml_imports_from_archive"] = bool(yaml_paths) and all(
-                "Copy Path.sublime-package" in path for path in yaml_paths.values()
-            )
-            yaml_case["passed"] = yaml_case["passed"] and yaml_case["yaml_imports_from_archive"]
+            yaml_case["yaml_from_library"] = yaml_from_library(yaml_paths)
+            yaml_case["passed"] = yaml_case["passed"] and yaml_case["yaml_from_library"]
             report["cases"].append(yaml_case)
 
             malformed_text = '{"a": [1,}\n'
@@ -1215,6 +1288,11 @@ def parse_arguments(argv=None):
         type=Path,
         help="official sublime_text_build_4215_x64.tar.xz",
     )
+    parser.add_argument(
+        "--pyyaml-wheel",
+        type=Path,
+        help="pinned {} (the pyyaml library Package Control installs)".format(PYYAML_WHEEL),
+    )
     parser.add_argument("--output", type=Path)
     parser.add_argument("--work-root", type=Path)
     parser.add_argument("--startup-timeout", type=float, default=90.0)
@@ -1226,8 +1304,8 @@ def main(argv=None):
     args = parse_arguments(argv)
     if args.self_test:
         return run_self_tests()
-    if args.sublime_archive is None or args.output is None:
-        print("FAIL: --sublime-archive and --output are required", file=sys.stderr)
+    if args.sublime_archive is None or args.pyyaml_wheel is None or args.output is None:
+        print("FAIL: --sublime-archive, --pyyaml-wheel and --output are required", file=sys.stderr)
         return 2
     try:
         report = run_acceptance(args)

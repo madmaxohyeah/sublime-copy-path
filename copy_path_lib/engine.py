@@ -13,6 +13,9 @@ _JSONC_EXTENSIONS = {
     '.sublime-merge-theme', '.hidden-color-scheme', '.sublime_session',
 }
 _XML_EXTENSIONS = {'.xml', '.xhtml', '.svg', '.xsl', '.xslt', '.xsd', '.plist', '.wsdl', '.resx'}
+# Package Control installs the pyyaml library from dependencies.json.
+MISSING_PYYAML = ('YAML needs the pyyaml library. Run "Package Control: Satisfy Libraries", '
+                  'then restart Sublime Text.')
 
 
 @dataclass(frozen=True)
@@ -116,7 +119,12 @@ def resolve_with_status(text, points, kind, style='auto'):
             from .xml_parser import parse
             document = parse(text, style=_xml_parser_style(style), recover=True)
         else:
-            from .yaml_parser import parse
+            try:
+                from .yaml_parser import parse
+            except ImportError as error:
+                if error.name != 'yaml':
+                    raise
+                raise PathError(MISSING_PYYAML) from None
             document = parse(text)
         paths = list(dict.fromkeys(
             render(_path_near(document, point), document.kind, style)

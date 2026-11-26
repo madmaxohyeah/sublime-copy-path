@@ -52,7 +52,7 @@ def _text(view):
 def _package_modules():
     result = {}
     for name, module in sorted(sys.modules.items()):
-        if name == "Copy Path" or name.startswith("Copy Path."):
+        if name in ("Copy Path", "yaml") or name.startswith(("Copy Path.", "yaml.")):
             location = getattr(module, "__file__", None)
             if location:
                 result[name] = location

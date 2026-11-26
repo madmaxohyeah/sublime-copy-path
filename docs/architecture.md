@@ -6,7 +6,7 @@
 
 - `json_parser.py` is a small validating scanner. A property's span covers its key, colon and value.
 - `xml_parser.py` validates with Expat, then scans the source a second time to get character offsets and namespace-expanded names. DTDs are rejected before any entity is processed. Sibling counts are kept per name, so positions and uniqueness checks never rescan siblings. If the file ends with unclosed ancestors, completed elements can still get a positional path (see the README).
-- `yaml_parser.py` reads parser events from the vendored, pure-Python PyYAML. It never constructs objects from tags and never expands aliases; anchors, aliases and merge keys are reported at their literal position.
+- `yaml_parser.py` reads parse events from PyYAML, which Package Control installs as the `pyyaml` library (`dependencies.json`). It uses the pure-Python `SafeLoader` only for its events, never constructs objects from tags and never expands aliases; anchors, aliases and merge keys are reported at their literal position. Without the library, `engine.py` reports a `PathError` that explains how to install it.
 - `model.py` holds the limits and picks the deepest span containing the caret (the narrowest one on a tie). `paths.py` renders JSONPath, JSON Pointer and XPath. `engine.py` detects the format and resolves all carets at once, removing duplicates while keeping their order.
 
 Parser errors are raised as `PathError` and never include document text.

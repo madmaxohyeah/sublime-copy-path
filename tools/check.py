@@ -43,7 +43,7 @@ def check_release_archive():
 def main():
     for name in PACKAGE_FILES:
         if name.endswith('.py'):
-            ast.parse((ROOT / name).read_text(encoding='utf-8'), filename=name, feature_version=(3, 8))
+            ast.parse((ROOT / name).read_text(encoding='utf-8'), filename=name)
     subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-v'], cwd=str(ROOT), check=True)
     subprocess.run([sys.executable, 'tools/runtime_smoke.py', '--self-test'], cwd=str(ROOT), check=True)
     if (ROOT / 'dist/Copy Path.sublime-package').read_bytes() != package_bytes(ROOT):

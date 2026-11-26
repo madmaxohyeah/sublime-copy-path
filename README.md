@@ -6,7 +6,7 @@ Copy the structural path of the element under your mouse or caret – not the fi
 - **XML, XHTML, SVG, XSLT, XSD and XML plist:** absolute XPath (`/catalog/book[@id='b']/@id`), with attribute, positional or text preference.
 - **YAML:** JSONPath or JSON Pointer for string-keyed mappings and sequences.
 - Native right-click menu and Command Palette. Works on unsaved changes, without altering text or selections.
-- Self-contained: no Python installation, network access or telemetry required; Package Control is optional.
+- No Python installation, network access or telemetry required. YAML support uses the `pyyaml` library, which Package Control installs with the package.
 
 Requires **Sublime Text 4** and is tested with build 4215. The plugin runs in Sublime's Python 3.14 plugin host.
 
@@ -20,6 +20,8 @@ Requires **Sublime Text 4** and is tested with build 4215. The plugin runs in Su
 2. In Sublime Text, choose **Preferences → Browse Packages…**.
 3. Go **up one folder**, then open or create **`Installed Packages`**.
 4. Place **`Copy Path.sublime-package`** there **without extracting or renaming it**, then restart Sublime Text.
+
+JSON, JSONC and XML work right away. For YAML, Copy Path needs Package Control's `pyyaml` library: if Package Control is installed, it adds the library at the next start (or run **Package Control: Satisfy Libraries**), then restart Sublime Text. Without it, copying in a YAML file shows a status-bar message instead.
 
 Do not put the ZIP inside `Packages/User` or double-click it to install. To update, replace the same file and restart. To uninstall, remove that file (or use **Package Control: Remove Package**) and optionally `Packages/User/Copy Path.sublime-settings`. Remove any unpacked development `Packages/Copy Path` copy before using a release archive; otherwise it can override the release.
 
@@ -66,7 +68,7 @@ Containers own their brackets/tags and intervening whitespace. A property owns i
 - **JSON:** strict JSON, including top-level scalars. Duplicate keys and malformed/truncated input are rejected.
 - **JSONC:** comments and trailing commas. Use a `.jsonc` filename with the built-in JSON syntax, or set the format override to `jsonc` for an untitled buffer or a file named `.json`. Build 4215 has no separate built-in “JSON with Comments” syntax. Sublime's JSON resource extensions (including `.sublime-completions`, `.sublime-file-icons`, `.sublime-macro` and `.sublime-merge-theme`) are treated as JSONC.
 - **XML:** well-formed XML, plus the bounded recovery described below. No schema validation is required. DTDs are rejected, so external and custom entities are never expanded. Predefined XML entities work. This is not an HTML parser.
-- **YAML:** single-document block/flow mappings and sequences, quoted/block scalars, scalar **string keys**. Mapping keys use YAML 1.1 implicit typing: quote numeric, boolean-like (`yes`, `on`, `true`) and null-like keys. Complex or typed keys and duplicates are rejected. Anchors, aliases and `<<` merge keys describe their **literal source locations**, not expanded/merged data. Unknown value tags never instantiate Python objects. Do not assume YAML paths refer to a loader's post-merge result.
+- **YAML:** single-document block/flow mappings and sequences, quoted/block scalars, scalar **string keys**. Mapping keys use YAML 1.1 implicit typing: quote numeric, boolean-like (`yes`, `on`, `true`) and null-like keys. Complex or typed keys and duplicates are rejected. Anchors, aliases and `<<` merge keys describe their **literal source locations**, not expanded/merged data. Unknown value tags never instantiate Python objects; only PyYAML's event parser is used. Do not assume YAML paths refer to a loader's post-merge result.
 - Unsupported: JSON5, TOML, generic HTML, CSV, embedded data inside another language, YAML multi-document streams and complex keys.
 - Hard limits: **2,000,000 characters**, **50,000 indexed spans**, **128 path levels**, **32 carets**. XML namespace URIs are capped at **1,024 characters** to prevent expanded-name memory amplification. YAML additionally bounds parser events. Parsing happens on demand off the UI thread; large files are not scanned while typing.
 
@@ -131,4 +133,4 @@ python3 tools/check.py
 
 ## License
 
-MIT; see [LICENSE](LICENSE). Vendored PyYAML parser components have their own MIT notice and provenance under `copy_path_lib/vendor/`.
+MIT; see [LICENSE](LICENSE).

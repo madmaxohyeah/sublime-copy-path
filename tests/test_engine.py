@@ -1,6 +1,8 @@
+import sys
 import unittest
 from dataclasses import is_dataclass
-from copy_path_lib.engine import detect_format, resolve, resolve_many, resolve_with_status
+from unittest import mock
+from copy_path_lib.engine import MISSING_PYYAML, detect_format, resolve, resolve_many, resolve_with_status
 from copy_path_lib.model import PathError
 
 
@@ -179,3 +181,20 @@ class ReviewRegressionTests(unittest.TestCase):
 
     def test_yaml_non_specific_tag_key_is_a_string(self):
         self.assertEqual(resolve('! a: x\n', 5, 'yaml'), '$.a')
+
+    def test_yaml_without_the_pyyaml_library_explains_how_to_get_it(self):
+        with mock.patch.dict(sys.modules):
+            sys.modules.pop('copy_path_lib.yaml_parser', None)
+            sys.modules['yaml'] = None  # As if Package Control never installed it.
+            with self.assertRaises(PathError) as raised:
+                resolve('a: x\n', 0, 'yaml')
+            self.assertEqual(str(raised.exception), MISSING_PYYAML)
+            self.assertEqual(resolve('{"a": 1}', 1, 'json'), '$.a')
+        self.assertEqual(resolve('a: x\n', 0, 'yaml'), '$.a')
+
+    def test_a_broken_pyyaml_library_is_not_reported_as_missing(self):
+        with mock.patch.dict(sys.modules):
+            sys.modules.pop('copy_path_lib.yaml_parser', None)
+            sys.modules['yaml.events'] = None
+            with self.assertRaises(ImportError):
+                resolve('a: x\n', 0, 'yaml')

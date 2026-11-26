@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0 – 2026-11-26
+
+- YAML parsing now uses Package Control's `pyyaml` library instead of a bundled copy of PyYAML's parser. Package Control installs it with the package. Without the library, copying in a YAML file shows how to install it; JSON and XML are not affected.
+
 ## 1.3.0 – 2026-11-24
 
 - The right-click menu settings have clearer names: `show_in_context_menu` is now `show_copy_element_path`, and `show_copy_path_as_submenu` is now `show_submenu_copy_element_path_as`.

@@ -1,11 +1,14 @@
-"""Safe, source-position-aware YAML parsing using vendored parse events."""
+"""Safe, source-position-aware YAML parsing from PyYAML parse events.
+
+PyYAML is Package Control's ``pyyaml`` library (see dependencies.json). Only its
+pure-Python event parser is used: no objects are constructed and aliases are
+never expanded.
+"""
 
 import re
 
-from .model import Document, PathError, MAX_SPANS, add_span, check_depth, check_text
-from .vendor.yaml import EventParser
-from .vendor.yaml.error import YAMLError
-from .vendor.yaml.events import (
+import yaml
+from yaml.events import (
     AliasEvent,
     DocumentStartEvent,
     MappingEndEvent,
@@ -14,6 +17,8 @@ from .vendor.yaml.events import (
     SequenceEndEvent,
     SequenceStartEvent,
 )
+
+from .model import Document, PathError, MAX_SPANS, add_span, check_depth, check_text
 
 _MAX_EVENTS = MAX_SPANS * 3 + 8
 _STRING_TAG = "tag:yaml.org,2002:str"
@@ -138,11 +143,10 @@ def parse(text):
         check_depth(len(path))
         return path, role
 
-    parser = None
+    # SafeLoader is always pure Python, so the events carry exact source marks.
+    events = yaml.parse(text, Loader=yaml.SafeLoader)
     try:
-        parser = EventParser(text)
-        while parser.check_event():
-            event = parser.get_event()
+        for event in events:
             event_count += 1
             if event_count > _MAX_EVENTS:
                 raise PathError("Document exceeds the 50,000-node safety limit.")
@@ -214,10 +218,9 @@ def parse(text):
             raise PathError("Invalid YAML document.")
     except PathError:
         raise
-    except (YAMLError, RecursionError, UnicodeError):
+    except (yaml.YAMLError, RecursionError, UnicodeError):
         raise PathError("Invalid YAML document.")
     finally:
-        if parser is not None:
-            parser.dispose()
+        events.close()
 
     return Document(len(text), "yaml", spans)

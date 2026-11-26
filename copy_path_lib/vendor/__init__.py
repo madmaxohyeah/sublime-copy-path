@@ -1,1 +1,0 @@
-"""Project-local vendored dependencies."""

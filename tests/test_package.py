@@ -26,6 +26,8 @@ class PackageTests(unittest.TestCase):
             names = archive.namelist()
             self.assertEqual(names, sorted(builder.PACKAGE_FILES))
             self.assertEqual(archive.read('.python-version'), b'3.8\n')
+            # Package Control installs the pyyaml library for YAML parsing.
+            self.assertEqual(json.loads(archive.read('dependencies.json')), {'*': {'*': ['pyyaml']}})
             for item in archive.infolist():
                 self.assertEqual(item.date_time, (2020, 1, 1, 0, 0, 0))
                 self.assertEqual(item.compress_type, zipfile.ZIP_STORED)
